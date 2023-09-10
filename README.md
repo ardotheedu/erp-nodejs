@@ -45,3 +45,5 @@ Onde tiver table_name modifique para o nome da tabela que você quer preencher
       papel_id: '2',
     },
   ])
+  4° Execute o comando 
+  npm run knex seed:run
