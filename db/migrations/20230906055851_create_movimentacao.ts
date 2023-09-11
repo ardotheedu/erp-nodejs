@@ -7,19 +7,18 @@ export async function up(knex: Knex): Promise<void> {
         table.string('nome').notNullable()
         table.string('descricao').nullable()
         table.enum('tipo_movimentacao',['entrada', 'saida', 'devolucao']).notNullable()
-        table.integer("quantidade").notNullable()
-        table.timestamp("data_movimentacao").notNullable()
+        table.integer('quantidade').notNullable()
+        table.timestamp('data_movimentacao').notNullable()
 
-        table.uuid("movimentacao_produto_id").notNullable();
-        table
-        .foreign("movimentacao_produto_id")
-        .references("id")
-        .inTable("produto");
+        table.uuid('movimentacao_produto_id')
+            .notNullable()
+            .references('id')
+            .inTable('produto');
     })
 }
 
 
 export async function down(knex: Knex): Promise<void> {
-    await knex.schema.dropTable("movimentacao");
+    await knex.schema.dropTable('movimentacao');
 }
 
