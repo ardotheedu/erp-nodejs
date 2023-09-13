@@ -14,6 +14,9 @@ export async function up(knex: Knex): Promise<void> {
 
         table.uuid('produto_categoria_id').notNullable()
             .references('id').inTable('categoria');
+        
+            table.uuid('produto_fornecedor_id').notNullable()
+            .references('id').inTable('fornecedor');
     })
 }
 
