@@ -1,15 +1,16 @@
-import { Knex } from "knex";
+import { Knex } from 'knex'
 
 export async function up(knex: Knex): Promise<void> {
-  await knex.schema.createTable("venda_saida", (table) => {
-    table.uuid("id").primary();
-    table.integer("pedido_id_venda").unsigned().notNullable();
-    table.foreign("pedido_id_venda").references("pedido_id").inTable("vendas");
-    table.timestamp("data_saida").notNullable();
-    table.integer("funcionario_id").notNullable();
-  });
+  await knex.schema.createTable('venda_saida', (table) => {
+    table.uuid('id').primary()
+    table.integer('pedido_id_venda').unsigned().notNullable()
+    table.foreign('pedido_id_venda').references('pedido_id').inTable('vendas')
+    table.timestamp('data_saida').notNullable()
+    table.integer('funcionario_id').notNullable()
+    table.decimal('total_da_venda', 10, 2).notNullable()
+  })
 }
 
 export async function down(knex: Knex): Promise<void> {
-  await knex.schema.dropTable("venda_saida");
+  await knex.schema.dropTable('venda_saida')
 }

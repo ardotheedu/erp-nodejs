@@ -1,6 +1,6 @@
-import { UUID } from 'node:crypto';
+import { UUID } from 'node:crypto'
 
 export interface category {
-    id?: UUID
-    name: string
+  id?: UUID
+  name: string
 }
