@@ -13,6 +13,7 @@ export async function seed(knex: Knex): Promise<void> {
       email: "italo@gmail.com",
       telefone: "74988888888",
       cpf: "12345678901",
+      tipo: "PF",
     },
     {
       id: randomUUID(),
@@ -20,6 +21,7 @@ export async function seed(knex: Knex): Promise<void> {
       email: "selmara@gmail.com",
       telefone: "7436111111",
       cpf: "78945612355",
+      tipo: "PF",
     },
   ]);
 }

@@ -12,12 +12,14 @@ export async function seed(knex: Knex): Promise<void> {
       pedido_id_venda: "555142645",
       data_saida: "2022-10-16",
       funcionario_id: "1454435",
+      total_da_venda: "1532.58",
     },
     {
       id: randomUUID(),
       pedido_id_venda: "55542866537",
       data_saida: "2023-02-20",
       funcionario_id: "434564",
+      total_da_venda: "361.44",
     },
   ]);
 }

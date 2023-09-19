@@ -13,6 +13,7 @@ export async function seed(knex: Knex): Promise<void> {
       data_pedido: "2023-09-01",
       total: "15314.15",
       status_pagamento: "aprovado",
+      status_pedido: "em processamento",
     },
     {
       id: randomUUID(),
@@ -20,6 +21,7 @@ export async function seed(knex: Knex): Promise<void> {
       data_pedido: "2023-08-26",
       total: "714",
       status_pagamento: "cancelado",
+      status_pedido: "cancelado",
     },
   ]);
 }
