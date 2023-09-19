@@ -6,7 +6,7 @@ import { checkSessionIdExists } from "../middlewares/check-session-id-exists";
 
 export async function pedidoRoutes(app: FastifyInstance) {
   app.get(
-    "/pedidos",
+    "/",
     {
       preHandler: [checkSessionIdExists],
     },
@@ -20,7 +20,7 @@ export async function pedidoRoutes(app: FastifyInstance) {
   );
 
   app.get(
-    "/pedidos/:id",
+    "/:id",
     {
       preHandler: [checkSessionIdExists],
     },

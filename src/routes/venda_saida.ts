@@ -7,7 +7,7 @@ import { checkSessionIdExists } from "../middlewares/check-session-id-exists";
 export async function vendaSaidaRoutes(app: FastifyInstance) {
   // Endpoint para listar todas as vendas de saída
   app.get(
-    "/vendas-saida",
+    "/",
     {
       preHandler: [checkSessionIdExists],
     },
@@ -22,7 +22,7 @@ export async function vendaSaidaRoutes(app: FastifyInstance) {
 
   // Endpoint para obter uma venda de saída por ID
   app.get(
-    "/vendas-saida/:id",
+    "/:id",
     {
       preHandler: [checkSessionIdExists],
     },
