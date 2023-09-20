@@ -20,6 +20,34 @@ export async function rhRoutes(app: FastifyInstance) {
   )
 
   app.get(
+    '/dados-bancarios',
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (request) => {
+      const { sessionId } = request.cookies
+
+      const rh = await knex('dados_bancarios').select()
+
+      return { rh }
+    },
+  )
+
+  app.get(
+    '/contra-cheque',
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (request) => {
+      const { sessionId } = request.cookies
+
+      const rh = await knex('contra-cheque').select()
+
+      return { rh }
+    },
+  )
+
+  app.get(
     '/:id',
     {
       preHandler: [checkSessionIdExists],
