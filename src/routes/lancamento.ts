@@ -52,7 +52,6 @@ export async function lancamentoRoutes(app: FastifyInstance) {
       data_pagamento: z.coerce.date(),
       valor: z.number(),
       metodo_pagamento: z.string(),
-      numero_nota: z.number(),
     });
 
     const {
@@ -61,7 +60,6 @@ export async function lancamentoRoutes(app: FastifyInstance) {
       data_pagamento,
       valor,
       metodo_pagamento,
-      numero_nota,
     } = createLancamentoBodySchema.parse(request.body);
 
     let sessionId = request.cookies.sessionId;
@@ -82,7 +80,6 @@ export async function lancamentoRoutes(app: FastifyInstance) {
       data_pagamento,
       valor,
       metodo_pagamento,
-      numero_nota,
     });
 
     return reply.status(201).send();
