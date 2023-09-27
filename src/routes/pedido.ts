@@ -45,9 +45,8 @@ export async function pedidoRoutes(app: FastifyInstance) {
     }
   );
 
-  app.post("/pedidos", async (request, reply) => {
+  app.post("/", async (request, reply) => {
     const createPedidoBodySchema = z.object({
-      id_pedido: z.string().uuid(),
       cliente_id_pedido: z.string(),
       data_pedido: z.string(),
       total: z.string(),
@@ -55,35 +54,40 @@ export async function pedidoRoutes(app: FastifyInstance) {
       status_pedido: z.string(),
     });
 
-    const {
-      id_pedido,
-      cliente_id_pedido,
-      data_pedido,
-      total,
-      status_pagamento,
-      status_pedido,
-    } = createPedidoBodySchema.parse(request.body);
+    try {
+      const {
+        cliente_id_pedido,
+        data_pedido,
+        total,
+        status_pagamento,
+        status_pedido,
+      } = createPedidoBodySchema.parse(request.body);
 
-    let sessionId = request.cookies.sessionId;
+      let sessionId = request.cookies.sessionId;
 
-    if (!sessionId) {
-      sessionId = randomUUID();
+      if (!sessionId) {
+        sessionId = randomUUID();
 
-      reply.setCookie("sessionId", sessionId, {
-        path: "/",
-        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+        reply.setCookie("sessionId", sessionId, {
+          path: "/",
+          maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+        });
+      }
+
+      const id = randomUUID();
+
+      await knex("pedido").insert({
+        id,
+        cliente_id_pedido,
+        data_pedido,
+        total,
+        status_pagamento,
+        status_pedido,
       });
+
+      return reply.status(201).send("Pedido cadastrado com sucesso!");
+    } catch (error) {
+      return reply.status(400).send("Erro ao cadastrar pedido.");
     }
-
-    await knex("pedido").insert({
-      id: randomUUID(),
-      cliente_id_pedido,
-      data_pedido,
-      total,
-      status_pagamento,
-      status_pedido,
-    });
-
-    return reply.status(201).send();
   });
 }

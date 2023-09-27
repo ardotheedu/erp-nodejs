@@ -45,38 +45,43 @@ export async function clienteRoutes(app: FastifyInstance) {
     }
   );
 
-  app.post("/clientes", async (request, reply) => {
+  app.post("/", async (request, reply) => {
     const createClienteBodySchema = z.object({
-      id_cliente: z.string().uuid(),
       nome: z.string(),
       email: z.string().email(),
       telefone: z.string(),
-      cpf: z.string(),
+      cpf_cnpj: z.string(),
       tipo: z.string(),
     });
 
-    const { id_cliente, nome, email, telefone, cpf, tipo } =
-      createClienteBodySchema.parse(request.body);
+    try {
+      const { nome, email, telefone, cpf_cnpj, tipo } =
+        createClienteBodySchema.parse(request.body);
 
-    let sessionId = request.cookies.sessionId;
+      let sessionId = request.cookies.sessionId;
 
-    if (!sessionId) {
-      sessionId = randomUUID();
+      if (!sessionId) {
+        sessionId = randomUUID();
 
-      reply.setCookie("sessionId", sessionId, {
-        path: "/",
-        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+        reply.setCookie("sessionId", sessionId, {
+          path: "/",
+          maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+        });
+      }
+
+      const id = randomUUID();
+
+      await knex("cliente").insert({
+        id,
+        nome,
+        email,
+        telefone,
+        cpf_cnpj,
+        tipo,
       });
+      return reply.status(201).send("Cliente cadastrado com sucesso!");
+    } catch (error) {
+      return reply.status(400).send("Erro ao cadastrar cliente.");
     }
-
-    await knex("cliente").insert({
-      id: randomUUID(),
-      nome,
-      email,
-      telefone,
-      cpf,
-      tipo,
-    });
-    return reply.status(201).send();
   });
 }

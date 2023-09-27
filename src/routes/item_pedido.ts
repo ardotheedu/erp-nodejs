@@ -45,42 +45,42 @@ export async function itemPedidoRoutes(app: FastifyInstance) {
     }
   );
 
-  app.post("/itens-pedido", async (request, reply) => {
+  app.post("/", async (request, reply) => {
     const createItemPedidoBodySchema = z.object({
-      id_item_pedido: z.string().uuid(),
       pedido_id_item: z.string(),
       produto_id: z.string(),
       quantidade: z.number(),
       preco_unitario: z.number(),
     });
 
-    const {
-      id_item_pedido,
-      pedido_id_item,
-      produto_id,
-      quantidade,
-      preco_unitario,
-    } = createItemPedidoBodySchema.parse(request.body);
+    try {
+      const { pedido_id_item, produto_id, quantidade, preco_unitario } =
+        createItemPedidoBodySchema.parse(request.body);
 
-    let sessionId = request.cookies.sessionId;
+      let sessionId = request.cookies.sessionId;
 
-    if (!sessionId) {
-      sessionId = randomUUID();
+      if (!sessionId) {
+        sessionId = randomUUID();
 
-      reply.setCookie("sessionId", sessionId, {
-        path: "/",
-        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+        reply.setCookie("sessionId", sessionId, {
+          path: "/",
+          maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+        });
+      }
+
+      const id = randomUUID();
+
+      await knex("item_pedido").insert({
+        id,
+        pedido_id_item,
+        produto_id,
+        quantidade,
+        preco_unitario,
       });
+
+      return reply.status(201).send("Item inserido com sucesso no pedido!");
+    } catch (error) {
+      return reply.status(400).send("Erro ao cadastrar item no pedido.");
     }
-
-    await knex("item_pedido").insert({
-      id: randomUUID(),
-      pedido_id_item,
-      produto_id,
-      quantidade,
-      preco_unitario,
-    });
-
-    return reply.status(201).send();
   });
 }
