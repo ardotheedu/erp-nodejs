@@ -1,5 +1,5 @@
-import { randomUUID } from "crypto";
 import { Knex } from "knex";
+import { randomUUID } from "crypto";
 
 export async function seed(knex: Knex): Promise<void> {
   // Deletes ALL existing entries
@@ -12,7 +12,7 @@ export async function seed(knex: Knex): Promise<void> {
       nome: "Italo",
       email: "italo@gmail.com",
       telefone: "74988888888",
-      cpf: "12345678901",
+      cpf_cnpj: "12345678901",
       tipo: "PF",
     },
     {
@@ -20,7 +20,7 @@ export async function seed(knex: Knex): Promise<void> {
       nome: "Selmara",
       email: "selmara@gmail.com",
       telefone: "7436111111",
-      cpf: "78945612355",
+      cpf_cnpj: "78945612355",
       tipo: "PF",
     },
   ]);

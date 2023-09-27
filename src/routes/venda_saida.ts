@@ -48,37 +48,42 @@ export async function vendaSaidaRoutes(app: FastifyInstance) {
   );
 
   // Endpoint para criar uma nova venda de saída
-  app.post("/vendas-saida", async (request, reply) => {
+  app.post("/", async (request, reply) => {
     const createVendaSaidaBodySchema = z.object({
-      id: z.string().uuid(),
       pedido_id_venda: z.string(),
       data_saida: z.string(), // Você pode ajustar isso para um tipo de data apropriado
       funcionario_id: z.string(),
       total_da_venda: z.string(), // Você pode ajustar isso para um tipo numérico apropriado
     });
 
-    const { id, pedido_id_venda, data_saida, funcionario_id, total_da_venda } =
-      createVendaSaidaBodySchema.parse(request.body);
+    try {
+      const { pedido_id_venda, data_saida, funcionario_id, total_da_venda } =
+        createVendaSaidaBodySchema.parse(request.body);
 
-    let sessionId = request.cookies.sessionId;
+      let sessionId = request.cookies.sessionId;
 
-    if (!sessionId) {
-      sessionId = randomUUID();
+      if (!sessionId) {
+        sessionId = randomUUID();
 
-      reply.setCookie("sessionId", sessionId, {
-        path: "/",
-        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+        reply.setCookie("sessionId", sessionId, {
+          path: "/",
+          maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+        });
+      }
+
+      const id = randomUUID();
+
+      await knex("venda_saida").insert({
+        id,
+        pedido_id_venda,
+        data_saida, // Ajuste para um formato de data adequado
+        funcionario_id,
+        total_da_venda, // Ajuste para um tipo numérico adequado
       });
+
+      return reply.status(201).send("Venda/saída cadastrado com sucesso!");
+    } catch (error) {
+      return reply.status(400).send("Erro ao cadastrar a venda/saída.");
     }
-
-    await knex("venda_saida").insert({
-      id: randomUUID(),
-      pedido_id_venda,
-      data_saida, // Ajuste para um formato de data adequado
-      funcionario_id,
-      total_da_venda, // Ajuste para um tipo numérico adequado
-    });
-
-    return reply.status(201).send();
   });
 }
