@@ -41,7 +41,7 @@ export async function rhRoutes(app: FastifyInstance) {
     async (request) => {
       const { sessionId } = request.cookies
 
-      const rh = await knex('contra-cheque').select()
+      const rh = await knex('contra_cheque').select()
 
       return { rh }
     },
@@ -119,6 +119,6 @@ export async function rhRoutes(app: FastifyInstance) {
       papel_id,
     })
 
-    return reply.status(201).send()
+    return reply.status(201).send({})
   })
 }
