@@ -81,9 +81,9 @@ export async function vendaSaidaRoutes(app: FastifyInstance) {
         total_da_venda, // Ajuste para um tipo numérico adequado
       });
 
-      return reply.status(201).send("Venda/saída cadastrado com sucesso!");
+      return reply.status(201).send({message: "Venda/saída cadastrado com sucesso!"});
     } catch (error) {
-      return reply.status(400).send("Erro ao cadastrar a venda/saída.");
+      return reply.status(400).send({message: "Erro ao cadastrar a venda/saída."});
     }
   });
 }

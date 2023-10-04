@@ -6,7 +6,7 @@ import { checkSessionIdExists } from '../middlewares/check-session-id-exists';
 
 export async function notaFiscalRoutes(app: FastifyInstance) {
   app.post(
-    '/notafiscal',
+    '/',
     {
       preHandler: [checkSessionIdExists],
     },
@@ -32,12 +32,12 @@ export async function notaFiscalRoutes(app: FastifyInstance) {
         numero_nota,
       });
 
-      return reply.status(201).send();
+      return reply.status(201).send({});
     }
   );
 
   app.get(
-    '/notafiscal',
+    '/',
     {
       preHandler: [checkSessionIdExists],
     },

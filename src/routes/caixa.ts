@@ -6,7 +6,7 @@ import { checkSessionIdExists } from '../middlewares/check-session-id-exists';
 
 export async function caixaRoutes(app: FastifyInstance) {
   app.get(
-    '/caixa',
+    '/',
     {
       preHandler: [checkSessionIdExists],
     },
@@ -19,7 +19,7 @@ export async function caixaRoutes(app: FastifyInstance) {
     }
   );
 
-  app.post('/caixa', async (request, reply) => {
+  app.post('/', async (request, reply) => {
     const createCaixaBodySchema = z.object({
       abertura: z.coerce.date(),
       fechamento: z.union([z.coerce.date().optional(), z.null()]),
@@ -62,6 +62,6 @@ export async function caixaRoutes(app: FastifyInstance) {
       saldo_fechamento,
     });
 
-    return reply.status(201).send();
+    return reply.status(201).send({});
   });
 }

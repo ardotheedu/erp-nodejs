@@ -79,9 +79,9 @@ export async function clienteRoutes(app: FastifyInstance) {
         cpf_cnpj,
         tipo,
       });
-      return reply.status(201).send("Cliente cadastrado com sucesso!");
+      return reply.status(201).send({message:"Cliente cadastrado com sucesso!"});
     } catch (error) {
-      return reply.status(400).send("Erro ao cadastrar cliente.");
+      return reply.status(400).send({message:"Erro ao cadastrar cliente."});
     }
   });
 }

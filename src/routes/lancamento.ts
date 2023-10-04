@@ -82,6 +82,6 @@ export async function lancamentoRoutes(app: FastifyInstance) {
       metodo_pagamento,
     });
 
-    return reply.status(201).send();
+    return reply.status(201).send({});
   });
 }
