@@ -20,6 +20,34 @@ export async function rhRoutes(app: FastifyInstance) {
   )
 
   app.get(
+    '/dados-bancarios',
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (request) => {
+      const { sessionId } = request.cookies
+
+      const rh = await knex('dados_bancarios').select()
+
+      return { rh }
+    },
+  )
+
+  app.get(
+    '/contra-cheque',
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (request) => {
+      const { sessionId } = request.cookies
+
+      const rh = await knex('contra_cheque').select()
+
+      return { rh }
+    },
+  )
+
+  app.get(
     '/:id',
     {
       preHandler: [checkSessionIdExists],
@@ -91,6 +119,73 @@ export async function rhRoutes(app: FastifyInstance) {
       papel_id,
     })
 
-    return reply.status(201).send()
+    return reply.status(201).send({})
+  })
+
+  app.post('/dados-bancarios', async (request, reply) => {
+    const createDadosBancariosBodySchema = z.object({
+      nomeBanco: z.string(),
+      agencia: z.string(),
+      conta: z.string(),
+      tipo: z.string(),
+      pix: z.string(),
+    })
+
+    const { nomeBanco, agencia, conta, tipo, pix } =
+      createDadosBancariosBodySchema.parse(request.body)
+
+    let sessionId = request.cookies.sessionId
+
+    if (!sessionId) {
+      sessionId = randomUUID()
+
+      reply.setCookie('sessionId', sessionId, {
+        path: '/',
+        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+      })
+    }
+
+    await knex('dados_bancarios').insert({
+      id: randomUUID(),
+      nomeBanco,
+      agencia,
+      conta,
+      tipo,
+      pix,
+    })
+
+    return reply.status(201).send({})
+  })
+
+  app.post('/contra-cheque', async (request, reply) => {
+    const createContraChequeBodySchema = z.object({
+      valor: z.number(),
+      data: z.coerce.date(),
+      funcionario_id: z.string(),
+    })
+
+    const { valor, data, funcionario_id } = createContraChequeBodySchema.parse(
+      request.body,
+    )
+
+    let sessionId = request.cookies.sessionId
+
+    if (!sessionId) {
+      sessionId = randomUUID()
+
+      reply.setCookie('sessionId', sessionId, {
+        path: '/',
+        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+      })
+    }
+
+    await knex('contra_cheque').insert({
+      id: randomUUID(),
+      valor,
+      data,
+      funcionario_id,
+    })
+
+    return reply.status(201).send({})
   })
 }

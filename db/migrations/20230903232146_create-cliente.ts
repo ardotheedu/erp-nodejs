@@ -6,7 +6,8 @@ export async function up(knex: Knex): Promise<void> {
     table.string("nome").notNullable();
     table.string("email").notNullable();
     table.string("telefone");
-    table.string("cpf").notNullable();
+    table.string("cpf_cnpj").notNullable();
+    table.string("tipo");
   });
 }
 export async function down(knex: Knex): Promise<void> {
