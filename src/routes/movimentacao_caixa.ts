@@ -5,54 +5,103 @@ import { knex } from '../database';
 import { checkSessionIdExists } from '../middlewares/check-session-id-exists';
 
 export async function movimentacaoCaixaRoutes(app: FastifyInstance) {
+  // Rota para criar uma nova movimentação (POST)
   app.post(
     '/movimentacao_caixa',
     {
       preHandler: [checkSessionIdExists],
     },
     async (request, reply) => {
-      const createMovimentacaoCaixaBodySchema = z.object({
-        timestamp: z.coerce.date(),
-        tipo: z.enum(['entrada', 'saida', 'devolucao']),
-        valor: z.number(),
-      });
-
-      const { timestamp, tipo, valor } = createMovimentacaoCaixaBodySchema.parse(
-        request.body
-      );
-
-      let sessionId = request.cookies.sessionId;
-
-      if (!sessionId) {
-        sessionId = randomUUID();
-
-        reply.setCookie('sessionId', sessionId, {
-          path: '/',
-          maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-        });
-      }
-
-      await knex('movimentacao_caixa').insert({
-        id: randomUUID(),
-        timestamp,
-        tipo,
-        valor,
-      });
-
+      // Lógica para criar uma nova movimentação
+      // ...
       return reply.status(201).send();
     }
   );
 
+  // Rota para obter todas as movimentações (GET)
   app.get(
     '/movimentacao_caixa',
     {
       preHandler: [checkSessionIdExists],
     },
     async (request) => {
-      const { sessionId } = request.cookies;
-      const movimentacoesCaixa = await knex('movimentacao_caixa').select();
+      // Lógica para obter todas as movimentações
+      // ...
+      return { movimentacaoCaixaRoutes };
+    }
+  );
 
-      return { movimentacoesCaixa };
+  // Rota para atualizar uma movimentação por ID (PUT)
+  app.put(
+    '/movimentacao_caixa/:id',
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (request, reply) => {
+      const updateMovimentacaoCaixaBodySchema = z.object({
+        tipo: z.enum(['entrada', 'saida', 'devolucao']),
+        valor: z.number(),
+      });
+
+      const { tipo, valor } = updateMovimentacaoCaixaBodySchema.parse(
+        request.body
+      );
+
+      const { id } = request.params;
+
+      try {
+        // Verifica se o ID existe antes de atualizar
+        const movimentacao = await knex('movimentacao_caixa')
+          .where({ id })
+          .first();
+
+        if (!movimentacao) {
+          return reply.status(404).send('Movimentação não encontrada.');
+        }
+
+        await knex('movimentacao_caixa')
+          .where({ id })
+          .update({
+            tipo,
+            valor,
+          });
+
+        return reply.status(204).send();
+      } catch (error) {
+        console.error(error);
+        return reply.status(500).send('Erro ao atualizar a movimentação.');
+      }
+    }
+  );
+
+  // Rota para excluir uma movimentação por ID (DELETE)
+  app.delete(
+    '/movimentacao_caixa/:id',
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (request, reply) => {
+      const { id } = request.params;
+
+      try {
+        // Verifica se o ID existe antes de excluir
+        const movimentacao = await knex('movimentacao_caixa')
+          .where({ id })
+          .first();
+
+        if (!movimentacao) {
+          return reply.status(404).send('Movimentação não encontrada.');
+        }
+
+        await knex('movimentacao_caixa')
+          .where({ id })
+          .del();
+
+        return reply.status(204).send();
+      } catch (error) {
+        console.error(error);
+        return reply.status(500).send('Erro ao excluir a movimentação.');
+      }
     }
   );
 }
