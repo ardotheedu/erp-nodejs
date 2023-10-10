@@ -1,13 +1,13 @@
-import { FastifyInstance } from 'fastify';
-import { z } from 'zod';
-import { randomUUID } from 'node:crypto';
-import { knex } from '../database';
-import { checkSessionIdExists } from '../middlewares/check-session-id-exists';
+import { FastifyInstance } from "fastify";
+import { z } from "zod";
+import { randomUUID } from "node:crypto";
+import { knex } from "../database";
+import { checkSessionIdExists } from "../middlewares/check-session-id-exists";
 
 export async function rhRoutes(app: FastifyInstance) {
   // Rota para obter todos os funcionários (GET)
   app.get(
-    '/',
+    "/",
     {
       preHandler: [checkSessionIdExists],
     },
@@ -20,7 +20,7 @@ export async function rhRoutes(app: FastifyInstance) {
 
   // Rota para obter todos os dados bancários (GET)
   app.get(
-    '/dados-bancarios',
+    "/dados-bancarios",
     {
       preHandler: [checkSessionIdExists],
     },
@@ -33,7 +33,7 @@ export async function rhRoutes(app: FastifyInstance) {
 
   // Rota para obter todos os contra-cheques (GET)
   app.get(
-    '/contra-cheque',
+    "/contra-cheque",
     {
       preHandler: [checkSessionIdExists],
     },
@@ -46,7 +46,7 @@ export async function rhRoutes(app: FastifyInstance) {
 
   // Rota para obter funcionário por ID (GET)
   app.get(
-    '/:id',
+    "/:id",
     {
       preHandler: [checkSessionIdExists],
     },
@@ -59,7 +59,7 @@ export async function rhRoutes(app: FastifyInstance) {
 
       const { sessionId } = request.cookies;
 
-      const funcionario = await knex('funcionario')
+      const funcionario = await knex("funcionario")
         .where({
           id,
         })
@@ -72,21 +72,21 @@ export async function rhRoutes(app: FastifyInstance) {
   );
 
   // Rota para criar um novo funcionário (POST)
-  app.post('/', async (request, reply) => {
+  app.post("/", async (request, reply) => {
     // Lógica para criar um novo funcionário
     // ...
     return reply.status(201).send();
   });
 
   // Rota para criar dados bancários (POST)
-  app.post('/dados-bancarios', async (request, reply) => {
+  app.post("/dados-bancarios", async (request, reply) => {
     // Lógica para criar dados bancários
     // ...
     return reply.status(201).send();
   });
 
   // Rota para criar contra-cheque (POST)
-  app.post('/contra-cheque', async (request, reply) => {
+  app.post("/contra-cheque", async (request, reply) => {
     // Lógica para criar contra-cheque
     // ...
     return reply.status(201).send();
@@ -94,7 +94,7 @@ export async function rhRoutes(app: FastifyInstance) {
 
   // Rota para atualizar funcionário por ID (PUT)
   app.put(
-    '/:id',
+    "/:id",
     {
       preHandler: [checkSessionIdExists],
     },
@@ -125,38 +125,34 @@ export async function rhRoutes(app: FastifyInstance) {
 
       try {
         // Verifica se o ID existe antes de atualizar
-        const funcionario = await knex('funcionario')
-          .where({ id })
-          .first();
+        const funcionario = await knex("funcionario").where({ id }).first();
 
         if (!funcionario) {
-          return reply.status(404).send('Funcionário não encontrado.');
+          return reply.status(404).send("Funcionário não encontrado.");
         }
 
-        await knex('funcionario')
-          .where({ id })
-          .update({
-            nome,
-            email,
-            senha,
-            telefone,
-            cargo,
-            salario,
-            data_contratacao,
-            papel_id,
-          });
+        await knex("funcionario").where({ id }).update({
+          nome,
+          email,
+          senha,
+          telefone,
+          cargo,
+          salario,
+          data_contratacao,
+          papel_id,
+        });
 
         return reply.status(204).send();
       } catch (error) {
         console.error(error);
-        return reply.status(500).send('Erro ao atualizar o funcionário.');
+        return reply.status(500).send("Erro ao atualizar o funcionário.");
       }
     }
   );
 
   // Rota para excluir funcionário por ID (DELETE)
   app.delete(
-    '/:id',
+    "/:id",
     {
       preHandler: [checkSessionIdExists],
     },
@@ -165,29 +161,25 @@ export async function rhRoutes(app: FastifyInstance) {
 
       try {
         // Verifica se o ID existe antes de excluir
-        const funcionario = await knex('funcionario')
-          .where({ id })
-          .first();
+        const funcionario = await knex("funcionario").where({ id }).first();
 
         if (!funcionario) {
-          return reply.status(404).send('Funcionário não encontrado.');
+          return reply.status(404).send("Funcionário não encontrado.");
         }
 
-        await knex('funcionario')
-          .where({ id })
-          .del();
+        await knex("funcionario").where({ id }).del();
 
         return reply.status(204).send();
       } catch (error) {
         console.error(error);
-        return reply.status(500).send('Erro ao excluir o funcionário.');
+        return reply.status(500).send("Erro ao excluir o funcionário.");
       }
     }
   );
 
   // Rota para atualizar dados bancários por ID (PUT)
   app.put(
-    '/dados-bancarios/:id',
+    "/dados-bancarios/:id",
     {
       preHandler: [checkSessionIdExists],
     },
@@ -200,7 +192,7 @@ export async function rhRoutes(app: FastifyInstance) {
 
   // Rota para excluir dados bancários por ID (DELETE)
   app.delete(
-    '/dados-bancarios/:id',
+    "/dados-bancarios/:id",
     {
       preHandler: [checkSessionIdExists],
     },
@@ -210,3 +202,4 @@ export async function rhRoutes(app: FastifyInstance) {
       return reply.status(204).send();
     }
   );
+}

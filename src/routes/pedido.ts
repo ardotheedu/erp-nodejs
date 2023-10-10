@@ -85,9 +85,71 @@ export async function pedidoRoutes(app: FastifyInstance) {
         status_pedido,
       });
 
-      return reply.status(201).send({message: "Pedido cadastrado com sucesso!"});
+      return reply
+        .status(201)
+        .send({ message: "Pedido cadastrado com sucesso!" });
     } catch (error) {
-      return reply.status(400).send({message: "Erro ao cadastrar pedido."});
+      return reply.status(400).send({ message: "Erro ao cadastrar pedido." });
+    }
+  });
+
+  app.put("/:id", async (request, reply) => {
+    const updatePedidoParamsSchema = z.object({
+      id: z.string().uuid(),
+    });
+
+    const updatePedidoBodySchema = z.object({
+      cliente_id_pedido: z.string(),
+      data_pedido: z.string(),
+      total: z.string(),
+      status_pagamento: z.string(),
+      status_pedido: z.string(),
+    });
+
+    try {
+      const { id } = updatePedidoParamsSchema.parse(request.params);
+      const {
+        cliente_id_pedido,
+        data_pedido,
+        total,
+        status_pagamento,
+        status_pedido,
+      } = updatePedidoBodySchema.parse(request.body);
+
+      const updatedPedido = {
+        cliente_id_pedido,
+        data_pedido,
+        total,
+        status_pagamento,
+        status_pedido,
+      };
+
+      await knex("pedido").where({ id }).update(updatedPedido);
+
+      return reply
+        .status(200)
+        .send({ message: "Pedido atualizado com sucesso!" });
+    } catch (error) {
+      return reply.status(400).send({ message: "Erro ao atualizar pedido." });
+    }
+  });
+
+  // Rota DELETE para excluir um pedido
+  app.delete("/:id", async (request, reply) => {
+    const deletePedidoParamsSchema = z.object({
+      id: z.string().uuid(),
+    });
+
+    try {
+      const { id } = deletePedidoParamsSchema.parse(request.params);
+
+      await knex("pedido").where({ id }).del();
+
+      return reply
+        .status(200)
+        .send({ message: "Pedido excluído com sucesso!" });
+    } catch (error) {
+      return reply.status(400).send({ message: "Erro ao excluir pedido." });
     }
   });
 }
