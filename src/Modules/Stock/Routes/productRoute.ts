@@ -49,7 +49,7 @@ export async function productRoutes(app: FastifyInstance) {
   
         create(product)
         
-        reply.status(201).send()
+        reply.status(201).send({})
         
       }catch(error : any){
         console.error('Erro ao inserir usuário:', error);

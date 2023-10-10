@@ -85,9 +85,9 @@ export async function pedidoRoutes(app: FastifyInstance) {
         status_pedido,
       });
 
-      return reply.status(201).send("Pedido cadastrado com sucesso!");
+      return reply.status(201).send({message: "Pedido cadastrado com sucesso!"});
     } catch (error) {
-      return reply.status(400).send("Erro ao cadastrar pedido.");
+      return reply.status(400).send({message: "Erro ao cadastrar pedido."});
     }
   });
 }

@@ -78,9 +78,9 @@ export async function itemPedidoRoutes(app: FastifyInstance) {
         preco_unitario,
       });
 
-      return reply.status(201).send("Item inserido com sucesso no pedido!");
+      return reply.status(201).send({message: "Item inserido com sucesso no pedido!"});
     } catch (error) {
-      return reply.status(400).send("Erro ao cadastrar item no pedido.");
+      return reply.status(400).send({message: "Erro ao cadastrar item no pedido."});
     }
   });
 }

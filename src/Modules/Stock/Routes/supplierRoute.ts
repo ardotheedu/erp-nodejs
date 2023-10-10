@@ -44,7 +44,7 @@ export async function supplierRoutes(app: FastifyInstance) {
   
         create(supplier)
         
-        reply.status(201).send()
+        reply.status(201).send({})
         
       }catch(error : any){
         console.error('Erro ao inserir usuário:', error);
