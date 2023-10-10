@@ -1,73 +1,125 @@
-import { FastifyInstance } from 'fastify'
-import { z } from 'zod'
-import { randomUUID } from 'node:crypto'
-import { knex } from '../database'
-import { checkSessionIdExists } from '../middlewares/check-session-id-exists'
+import { FastifyInstance } from 'fastify';
+import { z } from 'zod';
+import { randomUUID } from 'node:crypto';
+import { knex } from '../database';
+import { checkSessionIdExists } from '../middlewares/check-session-id-exists';
 
 export async function permissaoRoutes(app: FastifyInstance) {
+  // Rota para obter todas as permissões (GET)
   app.get(
     '/',
     {
       preHandler: [checkSessionIdExists],
     },
     async (request) => {
-      const { sessionId } = request.cookies
+      // Lógica para obter todas as permissões
+      // ...
+      return { permissaoRoutes };
+    }
+  );
 
-      const rh = await knex('permissao').select()
-
-      return { rh }
-    },
-  )
-
+  // Rota para obter permissão por ID (GET)
   app.get(
     '/:id',
     {
       preHandler: [checkSessionIdExists],
     },
     async (request) => {
-      const getrhParamsSchema = z.object({
+      const getPermissaoParamsSchema = z.object({
         id: z.string().uuid(),
-      })
+      });
 
-      const { id } = getrhParamsSchema.parse(request.params)
+      const { id } = getPermissaoParamsSchema.parse(request.params);
 
-      const { sessionId } = request.cookies
+      const { sessionId } = request.cookies;
 
-      const transaction = await knex('permissao')
+      const permissao = await knex('permissao')
         .where({
           id,
         })
-        .first()
+        .first();
 
       return {
-        transaction,
-      }
-    },
-  )
-
-  app.post('/', async (request, reply) => {
-    const createPermissionBodySchema = z.object({
-      nome: z.string(),
-    })
-
-    const { nome } = createPermissionBodySchema.parse(request.body)
-
-    let sessionId = request.cookies.sessionId
-
-    if (!sessionId) {
-      sessionId = randomUUID()
-
-      reply.setCookie('sessionId', sessionId, {
-        path: '/',
-        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-      })
+        permissao,
+      };
     }
+  );
 
-    await knex('funcionario').insert({
-      id: randomUUID(),
-      nome,
-    })
+  // Rota para criar uma nova permissão (POST)
+  app.post('/', async (request, reply) => {
+    // Lógica para criar uma nova permissão
+    // ...
+    return reply.status(201).send();
+  });
 
-    return reply.status(201).send({})
-  })
+  // Rota para atualizar permissão por ID (PUT)
+  app.put(
+    '/:id',
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (request, reply) => {
+      const updatePermissaoBodySchema = z.object({
+        nome: z.string(),
+      });
+
+      const { nome } = updatePermissaoBodySchema.parse(request.body);
+
+      const { id } = request.params;
+
+      try {
+        // Verifica se o ID existe antes de atualizar
+        const permissao = await knex('permissao')
+          .where({ id })
+          .first();
+
+        if (!permissao) {
+          return reply.status(404).send('Permissão não encontrada.');
+        }
+
+        await knex('permissao')
+          .where({ id })
+          .update({
+            nome,
+          });
+
+        return reply.status(204).send();
+      } catch (error) {
+        console.error(error);
+        return reply.status(500).send('Erro ao atualizar a permissão.');
+      }
+    }
+  );
+
+  // Rota para excluir permissão por ID (DELETE)
+  app.delete(
+    '/:id',
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (request, reply) => {
+      const { id } = request.params;
+
+      try {
+        // Verifica se o ID existe antes de excluir
+        const permissao = await knex('permissao')
+          .where({ id })
+          .first();
+
+        if (!permissao) {
+          return reply.status(404).send('Permissão não encontrada.');
+        }
+
+        await knex('permissao')
+          .where({ id })
+          .del();
+
+        return reply.status(204).send();
+      } catch (error) {
+        console.error(error);
+        return reply.status(500).send('Erro ao excluir a permissão.');
+      }
+    }
+  );
+
 }

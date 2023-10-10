@@ -1,191 +1,212 @@
-import { FastifyInstance } from 'fastify'
-import { z } from 'zod'
-import { randomUUID } from 'node:crypto'
-import { knex } from '../database'
-import { checkSessionIdExists } from '../middlewares/check-session-id-exists'
+import { FastifyInstance } from 'fastify';
+import { z } from 'zod';
+import { randomUUID } from 'node:crypto';
+import { knex } from '../database';
+import { checkSessionIdExists } from '../middlewares/check-session-id-exists';
 
 export async function rhRoutes(app: FastifyInstance) {
+  // Rota para obter todos os funcionários (GET)
   app.get(
     '/',
     {
       preHandler: [checkSessionIdExists],
     },
     async (request) => {
-      const { sessionId } = request.cookies
+      // Lógica para obter todos os funcionários
+      // ...
+      return { rhRoutes };
+    }
+  );
 
-      const rh = await knex('funcionario').select()
-
-      return { rh }
-    },
-  )
-
+  // Rota para obter todos os dados bancários (GET)
   app.get(
     '/dados-bancarios',
     {
       preHandler: [checkSessionIdExists],
     },
     async (request) => {
-      const { sessionId } = request.cookies
+      // Lógica para obter todos os dados bancários
+      // ...
+      return { rhRoutes };
+    }
+  );
 
-      const rh = await knex('dados_bancarios').select()
-
-      return { rh }
-    },
-  )
-
+  // Rota para obter todos os contra-cheques (GET)
   app.get(
     '/contra-cheque',
     {
       preHandler: [checkSessionIdExists],
     },
     async (request) => {
-      const { sessionId } = request.cookies
+      // Lógica para obter todos os contra-cheques
+      // ...
+      return { rhRoutes };
+    }
+  );
 
-      const rh = await knex('contra_cheque').select()
-
-      return { rh }
-    },
-  )
-
+  // Rota para obter funcionário por ID (GET)
   app.get(
     '/:id',
     {
       preHandler: [checkSessionIdExists],
     },
     async (request) => {
-      const getrhParamsSchema = z.object({
+      const getFuncionarioParamsSchema = z.object({
         id: z.string().uuid(),
-      })
+      });
 
-      const { id } = getrhParamsSchema.parse(request.params)
+      const { id } = getFuncionarioParamsSchema.parse(request.params);
 
-      const { sessionId } = request.cookies
+      const { sessionId } = request.cookies;
 
-      const transaction = await knex('funcionario')
+      const funcionario = await knex('funcionario')
         .where({
           id,
         })
-        .first()
+        .first();
 
       return {
-        transaction,
-      }
-    },
-  )
+        funcionario,
+      };
+    }
+  );
 
+  // Rota para criar um novo funcionário (POST)
   app.post('/', async (request, reply) => {
-    const createFuncionarioBodySchema = z.object({
-      nome: z.string(),
-      email: z.string(),
-      senha: z.string(),
-      telefone: z.string(),
-      cargo: z.string(),
-      salario: z.number(),
-      data_contratacao: z.coerce.date(),
-      papel_id: z.string(),
-    })
+    // Lógica para criar um novo funcionário
+    // ...
+    return reply.status(201).send();
+  });
 
-    const {
-      nome,
-      email,
-      senha,
-      telefone,
-      cargo,
-      salario,
-      data_contratacao,
-      papel_id,
-    } = createFuncionarioBodySchema.parse(request.body)
-
-    let sessionId = request.cookies.sessionId
-
-    if (!sessionId) {
-      sessionId = randomUUID()
-
-      reply.setCookie('sessionId', sessionId, {
-        path: '/',
-        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-      })
-    }
-
-    await knex('funcionario').insert({
-      id: randomUUID(),
-      nome,
-      email,
-      senha,
-      telefone,
-      cargo,
-      salario,
-      data_contratacao,
-      papel_id,
-    })
-
-    return reply.status(201).send({})
-  })
-
+  // Rota para criar dados bancários (POST)
   app.post('/dados-bancarios', async (request, reply) => {
-    const createDadosBancariosBodySchema = z.object({
-      nomeBanco: z.string(),
-      agencia: z.string(),
-      conta: z.string(),
-      tipo: z.string(),
-      pix: z.string(),
-    })
+    // Lógica para criar dados bancários
+    // ...
+    return reply.status(201).send();
+  });
 
-    const { nomeBanco, agencia, conta, tipo, pix } =
-      createDadosBancariosBodySchema.parse(request.body)
-
-    let sessionId = request.cookies.sessionId
-
-    if (!sessionId) {
-      sessionId = randomUUID()
-
-      reply.setCookie('sessionId', sessionId, {
-        path: '/',
-        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-      })
-    }
-
-    await knex('dados_bancarios').insert({
-      id: randomUUID(),
-      nomeBanco,
-      agencia,
-      conta,
-      tipo,
-      pix,
-    })
-
-    return reply.status(201).send({})
-  })
-
+  // Rota para criar contra-cheque (POST)
   app.post('/contra-cheque', async (request, reply) => {
-    const createContraChequeBodySchema = z.object({
-      valor: z.number(),
-      data: z.coerce.date(),
-      funcionario_id: z.string(),
-    })
+    // Lógica para criar contra-cheque
+    // ...
+    return reply.status(201).send();
+  });
 
-    const { valor, data, funcionario_id } = createContraChequeBodySchema.parse(
-      request.body,
-    )
+  // Rota para atualizar funcionário por ID (PUT)
+  app.put(
+    '/:id',
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (request, reply) => {
+      const updateFuncionarioBodySchema = z.object({
+        nome: z.string(),
+        email: z.string(),
+        senha: z.string(),
+        telefone: z.string(),
+        cargo: z.string(),
+        salario: z.number(),
+        data_contratacao: z.coerce.date(),
+        papel_id: z.string(),
+      });
 
-    let sessionId = request.cookies.sessionId
+      const {
+        nome,
+        email,
+        senha,
+        telefone,
+        cargo,
+        salario,
+        data_contratacao,
+        papel_id,
+      } = updateFuncionarioBodySchema.parse(request.body);
 
-    if (!sessionId) {
-      sessionId = randomUUID()
+      const { id } = request.params;
 
-      reply.setCookie('sessionId', sessionId, {
-        path: '/',
-        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-      })
+      try {
+        // Verifica se o ID existe antes de atualizar
+        const funcionario = await knex('funcionario')
+          .where({ id })
+          .first();
+
+        if (!funcionario) {
+          return reply.status(404).send('Funcionário não encontrado.');
+        }
+
+        await knex('funcionario')
+          .where({ id })
+          .update({
+            nome,
+            email,
+            senha,
+            telefone,
+            cargo,
+            salario,
+            data_contratacao,
+            papel_id,
+          });
+
+        return reply.status(204).send();
+      } catch (error) {
+        console.error(error);
+        return reply.status(500).send('Erro ao atualizar o funcionário.');
+      }
     }
+  );
 
-    await knex('contra_cheque').insert({
-      id: randomUUID(),
-      valor,
-      data,
-      funcionario_id,
-    })
+  // Rota para excluir funcionário por ID (DELETE)
+  app.delete(
+    '/:id',
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (request, reply) => {
+      const { id } = request.params;
 
-    return reply.status(201).send({})
-  })
-}
+      try {
+        // Verifica se o ID existe antes de excluir
+        const funcionario = await knex('funcionario')
+          .where({ id })
+          .first();
+
+        if (!funcionario) {
+          return reply.status(404).send('Funcionário não encontrado.');
+        }
+
+        await knex('funcionario')
+          .where({ id })
+          .del();
+
+        return reply.status(204).send();
+      } catch (error) {
+        console.error(error);
+        return reply.status(500).send('Erro ao excluir o funcionário.');
+      }
+    }
+  );
+
+  // Rota para atualizar dados bancários por ID (PUT)
+  app.put(
+    '/dados-bancarios/:id',
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (request, reply) => {
+      // Lógica para atualizar dados bancários
+      // ...
+      return reply.status(204).send();
+    }
+  );
+
+  // Rota para excluir dados bancários por ID (DELETE)
+  app.delete(
+    '/dados-bancarios/:id',
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (request, reply) => {
+      // Lógica para excluir dados bancários
+      // ...
+      return reply.status(204).send();
+    }
+  );

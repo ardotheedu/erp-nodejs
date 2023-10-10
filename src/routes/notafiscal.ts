@@ -7,45 +7,20 @@ import { checkSessionIdExists } from '../middlewares/check-session-id-exists';
 export async function notaFiscalRoutes(app: FastifyInstance) {
   // Rota para criar uma nova nota fiscal (POST)
   app.post(
-    '/',
+    '/notafiscal',
     {
       preHandler: [checkSessionIdExists],
     },
     async (request, reply) => {
-<<<<<<< HEAD
       // Lógica para criar uma nova nota fiscal
       // ...
       return reply.status(201).send();
-=======
-      const createNotaFiscalBodySchema = z.object({
-        numero_nota: z.number(),
-      });
-
-      const { numero_nota } = createNotaFiscalBodySchema.parse(request.body);
-
-      let sessionId = request.cookies.sessionId;
-
-      if (!sessionId) {
-        sessionId = randomUUID();
-
-        reply.setCookie('sessionId', sessionId, {
-          path: '/',
-          maxAge: 1000 * 60 * 60 * 24 * 7, 
-        });
-      }
-      await knex('notafiscal').insert({
-        id: randomUUID(),
-        numero_nota,
-      });
-
-      return reply.status(201).send({});
->>>>>>> 0d3a7c4623d697950462268617b21ff329361a8d
     }
   );
 
   // Rota para obter todas as notas fiscais (GET)
   app.get(
-    '/',
+    '/notafiscal',
     {
       preHandler: [checkSessionIdExists],
     },
