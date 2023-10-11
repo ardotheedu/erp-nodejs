@@ -81,9 +81,70 @@ export async function vendaSaidaRoutes(app: FastifyInstance) {
         total_da_venda, // Ajuste para um tipo numérico adequado
       });
 
-      return reply.status(201).send({message: "Venda/saída cadastrado com sucesso!"});
+      return reply
+        .status(201)
+        .send({ message: "Venda/saída cadastrado com sucesso!" });
     } catch (error) {
-      return reply.status(400).send({message: "Erro ao cadastrar a venda/saída."});
+      return reply
+        .status(400)
+        .send({ message: "Erro ao cadastrar a venda/saída." });
+    }
+  });
+
+  app.put("/:id", async (request, reply) => {
+    const updateVendaSaidaParamsSchema = z.object({
+      id: z.string().uuid(),
+    });
+
+    const updateVendaSaidaBodySchema = z.object({
+      pedido_id_venda: z.string(),
+      data_saida: z.string(), // Você pode ajustar isso para um tipo de data apropriado
+      funcionario_id: z.string(),
+      total_da_venda: z.string(), // Você pode ajustar isso para um tipo numérico apropriado
+    });
+
+    try {
+      const { id } = updateVendaSaidaParamsSchema.parse(request.params);
+      const { pedido_id_venda, data_saida, funcionario_id, total_da_venda } =
+        updateVendaSaidaBodySchema.parse(request.body);
+
+      const updatedVendaSaida = {
+        pedido_id_venda,
+        data_saida, // Ajuste para um formato de data adequado
+        funcionario_id,
+        total_da_venda, // Ajuste para um tipo numérico adequado
+      };
+
+      await knex("venda_saida").where({ id }).update(updatedVendaSaida);
+
+      return reply
+        .status(200)
+        .send({ message: "Venda/saída atualizada com sucesso!" });
+    } catch (error) {
+      return reply
+        .status(400)
+        .send({ message: "Erro ao atualizar a venda/saída." });
+    }
+  });
+
+  // Rota DELETE para excluir uma venda de saída
+  app.delete("/:id", async (request, reply) => {
+    const deleteVendaSaidaParamsSchema = z.object({
+      id: z.string().uuid(),
+    });
+
+    try {
+      const { id } = deleteVendaSaidaParamsSchema.parse(request.params);
+
+      await knex("venda_saida").where({ id }).del();
+
+      return reply
+        .status(200)
+        .send({ message: "Venda/saída excluída com sucesso!" });
+    } catch (error) {
+      return reply
+        .status(400)
+        .send({ message: "Erro ao excluir a venda/saída." });
     }
   });
 }
