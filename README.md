@@ -47,3 +47,5 @@ Onde tiver table_name modifique para o nome da tabela que você quer preencher
   ])
   4° Execute o comando 
   npm run knex seed:run
+
+  

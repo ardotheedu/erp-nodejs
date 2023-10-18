@@ -12,7 +12,7 @@ export const authenticate = async (request: FastifyRequest, reply: FastifyReply)
       throw new Error('Token não fornecido');
     }
 
-    const decodedToken: any = verify(token, env.SECRETKEY);
+    const decodedToken: any = verify(token.split(" ")[1], env.SECRETKEY);
     request.user = decodedToken.user;
   } catch (error) {
     reply.status(401).send({ error: 'Falha na autenticação' });
