@@ -12,6 +12,8 @@ export async function up(knex: Knex): Promise<void> {
     table.string('salario')
     table.timestamp('data_contratacao').notNullable()
     table.string('papel_id')
+    table.foreign('papel_id').references('id').inTable('permissao')
+    table.string('papel_id')
   })
 }
 

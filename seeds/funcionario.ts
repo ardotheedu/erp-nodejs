@@ -10,6 +10,17 @@ export async function seed(knex: Knex): Promise<void> {
     {
       id: randomUUID(),
       nome: 'João',
+      email: 'gabriel@gmail.com',
+      senha: '123456',
+      telefone: '123456789',
+      cargo: 'Estoquista',
+      salario: '1.320',
+      data_contratacao: '2021-09-03',
+      papel_id: '123435',
+    },
+    {
+      id: randomUUID(),
+      nome: 'João',
       email: 'joao@gmail.com',
       senha: '123456',
       telefone: '123456789',
