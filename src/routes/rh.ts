@@ -56,7 +56,7 @@ export async function rhRoutes(app: FastifyInstance) {
   app.get(
     '/',
     {
-      preHandler: [authenticate, authorize(UserRole.ADMIN)],
+      preValidation: [authenticate, authorize(UserRole.ADMIN)],
     },
     async (request) => {
       try {
