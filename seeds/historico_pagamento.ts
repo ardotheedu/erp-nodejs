@@ -1,4 +1,3 @@
-// seed.js
 import { randomUUID } from 'crypto';
 import { Knex } from 'knex';
 
