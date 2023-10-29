@@ -12,8 +12,6 @@ export async function movimentacaoCaixaRoutes(app: FastifyInstance) {
       preHandler: [checkSessionIdExists],
     },
     async (request, reply) => {
-      // Lógica para criar uma nova movimentação
-      // ...
       return reply.status(201).send();
     }
   );
@@ -25,11 +23,10 @@ export async function movimentacaoCaixaRoutes(app: FastifyInstance) {
       preHandler: [checkSessionIdExists],
     },
     async (request) => {
-      // Lógica para obter todas as movimentações
-      // ...
-      return { movimentacaoCaixaRoutes };
+      const movimentacoes = await knex('movimentacao_caixa').select();
+      return { movimentacoes };
     }
-  );
+  );  
 
   // Rota para atualizar uma movimentação por ID (PUT)
   app.put(
