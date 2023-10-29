@@ -12,12 +12,16 @@ export async function lancamentoRoutes(app: FastifyInstance) {
       preHandler: [checkSessionIdExists],
     },
     async (request) => {
-      // Lógica para obter todos os lançamentos
-      // ...
-      return { lancamentoRoutes };
+      try {
+        // Lógica para obter todos os lançamentos
+        const lancamentos = await knex('lancamento').select();
+        return { lancamentos };
+      } catch (error) {
+        console.error(error);
+        return { error: 'Erro ao buscar lançamentos.' };
+      }
     }
-  );
-
+  );  
   // Rota para obter um lançamento por ID (GET)
   app.get(
     '/:id',
