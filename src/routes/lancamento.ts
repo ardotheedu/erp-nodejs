@@ -39,10 +39,40 @@ export async function lancamentoRoutes(app: FastifyInstance) {
 
   // Rota para criar um novo lançamento (POST)
   app.post('/', async (request, reply) => {
-    // Lógica para criar um novo lançamento
-    // ...
-    return reply.status(201).send();
+    const createLancamentoBodySchema = z.object({
+      id_nota: z.string().uuid(),
+      data_vencimento: z.coerce.date(),
+      data_pagamento: z.coerce.date(),
+      valor: z.number(),
+      metodo_pagamento: z.string(),
+    });
+  
+    try {
+      const {
+        id_nota,
+        data_vencimento,
+        data_pagamento,
+        valor,
+        metodo_pagamento,
+      } = createLancamentoBodySchema.parse(request.body);
+  
+      const id = randomUUID();
+  
+      await knex('lancamento').insert({
+        id,
+        id_nota,
+        data_vencimento,
+        data_pagamento,
+        valor,
+        metodo_pagamento,
+      });
+      return reply.status(201).send({ message: 'Lançamento cadastrado com sucesso!' });
+    } catch (error) {
+      console.error(error);
+      return reply.status(400).send({ message: 'Erro ao cadastrar lançamento.' });
+    }
   });
+  
 
   // Rota para atualizar um lançamento por ID (PUT)
   app.put(
@@ -96,7 +126,6 @@ export async function lancamentoRoutes(app: FastifyInstance) {
       }
     }
   );
-
   // Rota para excluir um lançamento por ID (DELETE)
   app.delete(
     '/:id',

@@ -12,11 +12,16 @@ export async function permissaoRoutes(app: FastifyInstance) {
       preHandler: [checkSessionIdExists],
     },
     async (request) => {
-      // Lógica para obter todas as permissões
-      // ...
-      return { permissaoRoutes };
+      try {
+        const permissoes = await knex('permissao').select();
+        return { permissoes };
+      } catch (error) {
+        console.error(error);
+        return { error: 'Erro ao buscar permissões.' };
+      }
     }
   );
+  
 
   // Rota para obter permissão por ID (GET)
   app.get(
@@ -47,10 +52,25 @@ export async function permissaoRoutes(app: FastifyInstance) {
 
   // Rota para criar uma nova permissão (POST)
   app.post('/', async (request, reply) => {
-    // Lógica para criar uma nova permissão
-    // ...
-    return reply.status(201).send();
-  });
+    const createPermissaoBodySchema = z.object({
+      nome: z.string(),
+    });
+  
+    try {
+      const { nome } = createPermissaoBodySchema.parse(request.body);
+  
+      const id = randomUUID();
+  
+      await knex('permissao').insert({
+        id,
+        nome,
+      });
+      return reply.status(201).send({ message: 'Permissão cadastrada com sucesso!' });
+    } catch (error) {
+      console.error(error);
+      return reply.status(400).send({ message: 'Erro ao cadastrar permissão.' });
+    }
+  });  
 
   // Rota para atualizar permissão por ID (PUT)
   app.put(
