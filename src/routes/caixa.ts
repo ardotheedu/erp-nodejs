@@ -5,16 +5,19 @@ import { knex } from '../database';
 import { checkSessionIdExists } from '../middlewares/check-session-id-exists';
 
 export async function caixaRoutes(app: FastifyInstance) {
-  // Rota para obter informações do caixa (GET)
   app.get(
     '/',
     {
       preHandler: [checkSessionIdExists],
     },
     async (request) => {
-      // Lógica para obter informações do caixa
-      // ...
-      return { caixaRoutes };
+      try {
+        const caixaInfo = await knex('caixa').select();
+        return { caixaInfo };
+      } catch (error) {
+        console.error(error);
+        return { error: 'Erro ao buscar informações do caixa.' };
+      }
     }
   );
 
@@ -46,7 +49,7 @@ export async function caixaRoutes(app: FastifyInstance) {
 
       reply.setCookie('sessionId', sessionId, {
         path: '/',
-        maxAge: 1000 * 60 * 60 * 24 * 7, 
+        maxAge: 1000 * 60 * 60 * 24 * 7,
       });
     }
 
