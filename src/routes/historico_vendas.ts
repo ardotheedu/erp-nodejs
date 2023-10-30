@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { knex } from '../database';
 
 export async function historicoPagamentosRoutes(app: FastifyInstance) {
-  // Rota para obter todos os históricos de pagamentos (GET)
   app.get('/', async (request, reply) => {
     try {
       const historicoPagamentos = await knex('historico_pagamentos').select('*');
@@ -14,7 +13,6 @@ export async function historicoPagamentosRoutes(app: FastifyInstance) {
     }
   });
 
-  // Rota para criar um novo histórico de pagamento (POST)
   app.post('/', async (request, reply) => {
     try {
       const novoHistoricoPagamento = request.body;
