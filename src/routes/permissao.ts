@@ -4,36 +4,16 @@ import { randomUUID } from 'node:crypto';
 import { knex } from '../database';
 import { checkSessionIdExists } from '../middlewares/check-session-id-exists';
 
-export async function lancamentoRoutes(app: FastifyInstance) {
-  app.get(
-    '/:id',
-    {
-      preHandler: [checkSessionIdExists],
-    },
-    async (request) => {
-      const getPermissaoParamsSchema = z.object({
-        id: z.string().uuid(),
-      });
-
-      const { id } = getPermissaoParamsSchema.parse(request.params);
-
-      try {
-        // Lógica para obter uma permissão por ID
-        const permissao = await knex('permissao')
-          .where({ id })
-          .first();
-
-        if (!permissao) {
-          return { error: 'Permissão não encontrada.' };
-        }
-
-        return { permissao };
-      } catch (error) {
-        console.error(error);
-        return { error: 'Erro ao buscar a permissão.' };
-      }
+export async function permissaoRoutes(app: FastifyInstance) {
+  app.get('/', async (request) => {
+    try {
+      const permissoes = await knex('permissao').select();
+      return { permissoes };
+    } catch (error) {
+      console.error(error);
+      return { error: 'Erro ao buscar permissões.' };
     }
-  );
+  });
 
   app.post('/', async (request, reply) => {
     const createPermissaoBodySchema = z.object({
