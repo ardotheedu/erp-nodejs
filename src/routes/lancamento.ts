@@ -4,155 +4,113 @@ import { randomUUID } from 'node:crypto';
 import { knex } from '../database';
 import { checkSessionIdExists } from '../middlewares/check-session-id-exists';
 
-export async function lancamentoRoutes(app: FastifyInstance) {
-  // Rota para obter todos os lançamentos (GET)
-  app.get(
-    '/',
-    {
-      preHandler: [checkSessionIdExists],
-    },
-    async (request) => {
-      try {
-        // Lógica para obter todos os lançamentos
-        const lancamentos = await knex('lancamento').select();
-        return { lancamentos };
-      } catch (error) {
-        console.error(error);
-        return { error: 'Erro ao buscar lançamentos.' };
-      }
-    }
-  );  
-  // Rota para obter um lançamento por ID (GET)
+export async function permissaoRoutes(app: FastifyInstance) {
+  // Rota para obter permissão por ID (GET)
   app.get(
     '/:id',
     {
       preHandler: [checkSessionIdExists],
     },
     async (request) => {
-      // Lógica para obter um lançamento por ID
-      // ...
-      return {
-        lancamentoRoutes,
-      };
+      const getPermissaoParamsSchema = z.object({
+        id: z.string().uuid(),
+      });
+
+      const { id } = getPermissaoParamsSchema.parse(request.params);
+
+      try {
+        // Lógica para obter uma permissão por ID
+        const permissao = await knex('permissao')
+          .where({ id })
+          .first();
+
+        if (!permissao) {
+          return { error: 'Permissão não encontrada.' };
+        }
+
+        return { permissao };
+      } catch (error) {
+        console.error(error);
+        return { error: 'Erro ao buscar a permissão.' };
+      }
     }
   );
 
-  // Rota para criar um novo lançamento (POST)
-  app.post('/', async (request, reply) => {
-    const createLancamentoBodySchema = z.object({
-      id_nota: z.string().uuid(),
-      data_vencimento: z.coerce.date(),
-      data_pagamento: z.coerce.date(),
-      valor: z.number(),
-      metodo_pagamento: z.string(),
-    });
-  
-    try {
-      const {
-        id_nota,
-        data_vencimento,
-        data_pagamento,
-        valor,
-        metodo_pagamento,
-      } = createLancamentoBodySchema.parse(request.body);
-  
-      const id = randomUUID();
-  
-      await knex('lancamento').insert({
-        id,
-        id_nota,
-        data_vencimento,
-        data_pagamento,
-        valor,
-        metodo_pagamento,
-      });
-      return reply.status(201).send({ message: 'Lançamento cadastrado com sucesso!' });
-    } catch (error) {
-      console.error(error);
-      return reply.status(400).send({ message: 'Erro ao cadastrar lançamento.' });
-    }
-  });
-  
+  // Restante do código da rota de permissão (GET) permanece inalterado
 
-  // Rota para atualizar um lançamento por ID (PUT)
+  // Rota para atualizar permissão por ID (PUT)
   app.put(
     '/:id',
     {
       preHandler: [checkSessionIdExists],
     },
     async (request, reply) => {
-      const updateLancamentoBodySchema = z.object({
-        id_nota: z.string().uuid(),
-        data_vencimento: z.coerce.date(),
-        data_pagamento: z.coerce.date(),
-        valor: z.number(),
-        metodo_pagamento: z.string(),
+      const updatePermissaoParamsSchema = z.object({
+        id: z.string().uuid(),
       });
 
-      const {
-        id_nota,
-        data_vencimento,
-        data_pagamento,
-        valor,
-        metodo_pagamento,
-      } = updateLancamentoBodySchema.parse(request.body);
-
-      const { id } = request.params;
+      const updatePermissaoBodySchema = z.object({
+        nome: z.string(),
+      });
 
       try {
+        const { id } = updatePermissaoParamsSchema.parse(request.params);
+        const { nome } = updatePermissaoBodySchema.parse(request.body);
+
         // Verifica se o ID existe antes de atualizar
-        const lancamento = await knex('lancamento')
+        const permissao = await knex('permissao')
           .where({ id })
           .first();
 
-        if (!lancamento) {
-          return reply.status(404).send('Lançamento não encontrado.');
+        if (!permissao) {
+          return reply.status(404).send('Permissão não encontrada.');
         }
 
-        await knex('lancamento')
+        await knex('permissao')
           .where({ id })
           .update({
-            id_nota,
-            data_vencimento,
-            data_pagamento,
-            valor,
-            metodo_pagamento,
+            nome,
           });
 
         return reply.status(204).send();
       } catch (error) {
         console.error(error);
-        return reply.status(500).send('Erro ao atualizar o lançamento.');
+        return reply.status(500).send('Erro ao atualizar a permissão.');
       }
     }
   );
-  // Rota para excluir um lançamento por ID (DELETE)
+
+  // Rota para excluir permissão por ID (DELETE)
   app.delete(
     '/:id',
     {
       preHandler: [checkSessionIdExists],
     },
     async (request, reply) => {
-      const { id } = request.params;
+      const deletePermissaoParamsSchema = z.object({
+        id: z.string().uuid(),
+      });
 
       try {
+        const { id } = deletePermissaoParamsSchema.parse(request.params);
+
         // Verifica se o ID existe antes de excluir
-        const lancamento = await knex('lancamento')
+        const permissao = await knex('permissao')
           .where({ id })
           .first();
 
-        if (!lancamento) {
-          return reply.status(404).send('Lançamento não encontrado.');
+        if (!permissao) {
+          return reply.status(404).send('Permissão não encontrada.');
         }
 
-        await knex('lancamento')
+        await knex('permissao')
           .where({ id })
           .del();
 
         return reply.status(204).send();
       } catch (error) {
         console.error(error);
-        return reply.status(500).send('Erro ao excluir o lançamento.');
+        return reply.status(500).send('Erro ao excluir a permissão.');
       }
     }
   );
