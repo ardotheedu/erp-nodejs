@@ -40,3 +40,9 @@ app.register(routes.notaFiscalRoutes, {
 app.register(routes.caixaRoutes, {
   prefix: "caixa",
 });
+app.register(routes.permissaoRoutes, {
+  prefix: "permissao",
+});
+app.register(routes.movimentacaoCaixaRoutes, {
+  prefix: "movimentacao_caixa",
+});

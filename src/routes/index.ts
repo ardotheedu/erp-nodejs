@@ -7,3 +7,5 @@ export { vendaSaidaRoutes } from "./venda_saida";
 export { lancamentoRoutes } from "./lancamento";
 export { notaFiscalRoutes } from "./notafiscal";
 export { caixaRoutes } from "./caixa";
+export { permissaoRoutes } from "./permissao";
+export { movimentacaoCaixaRoutes } from "./movimentacao_caixa";
