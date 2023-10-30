@@ -5,7 +5,57 @@ import { knex } from '../database';
 import { checkSessionIdExists } from '../middlewares/check-session-id-exists';
 
 export async function lancamentoRoutes(app: FastifyInstance) {
-  // Rota para atualizar lançamento por ID (PUT)
+  app.get(
+    '/:id',
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (request) => {
+      const getPermissaoParamsSchema = z.object({
+        id: z.string().uuid(),
+      });
+
+      const { id } = getPermissaoParamsSchema.parse(request.params);
+
+      try {
+        // Lógica para obter uma permissão por ID
+        const permissao = await knex('permissao')
+          .where({ id })
+          .first();
+
+        if (!permissao) {
+          return { error: 'Permissão não encontrada.' };
+        }
+
+        return { permissao };
+      } catch (error) {
+        console.error(error);
+        return { error: 'Erro ao buscar a permissão.' };
+      }
+    }
+  );
+
+  app.post('/', async (request, reply) => {
+    const createPermissaoBodySchema = z.object({
+      nome: z.string(),
+    });
+  
+    try {
+      const { nome } = createPermissaoBodySchema.parse(request.body);
+  
+      const id = randomUUID();
+  
+      await knex('permissao').insert({
+        id,
+        nome,
+      });
+      return reply.status(201).send({ message: 'Permissão cadastrada com sucesso!' });
+    } catch (error) {
+      console.error(error);
+      return reply.status(400).send({ message: 'Erro ao cadastrar permissão.' });
+    }
+  });
+  
   app.put(
     '/:id',
     {

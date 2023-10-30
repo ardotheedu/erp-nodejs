@@ -36,7 +36,26 @@ export async function permissaoRoutes(app: FastifyInstance) {
     }
   );
 
-  // Restante do código da rota de permissão (GET) permanece inalterado
+  app.post('/', async (request, reply) => {
+    const createPermissaoBodySchema = z.object({
+      nome: z.string(),
+    });
+  
+    try {
+      const { nome } = createPermissaoBodySchema.parse(request.body);
+  
+      const id = randomUUID();
+  
+      await knex('permissao').insert({
+        id,
+        nome,
+      });
+      return reply.status(201).send({ message: 'Permissão cadastrada com sucesso!' });
+    } catch (error) {
+      console.error(error);
+      return reply.status(400).send({ message: 'Erro ao cadastrar permissão.' });
+    }
+  });
 
   // Rota para atualizar permissão por ID (PUT)
   app.put(
