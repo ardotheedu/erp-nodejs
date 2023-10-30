@@ -4,7 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { knex } from '../database';
 
 export async function movimentacaoCaixaRoutes(app: FastifyInstance) {
-  app.get('/movimentacao_caixa', async (request, reply) => {
+  app.get('/', async (request) => {
     try {
       const movimentacoes = await knex('movimentacao_caixa').select();
       return { movimentacoes };
@@ -15,7 +15,7 @@ export async function movimentacaoCaixaRoutes(app: FastifyInstance) {
   });
 
   // Rota para criar uma nova movimentação de caixa (POST)
-  app.post('/movimentacao_caixa', async (request, reply) => {
+  app.post('/', async (request, reply) => {
     const createMovimentacaoCaixaBodySchema = z.object({
       tipo: z.enum(['entrada', 'saida', 'devolucao']),
       valor: z.number(),
