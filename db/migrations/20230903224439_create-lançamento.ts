@@ -9,6 +9,7 @@ export async function up(knex: Knex): Promise<void> {
     table.timestamp('data_pagamento')
     table.float('valor').notNullable()
     table.string('metodo_pagamento').notNullable()
+    table.string('status').notNullable()
   })
 }
 
