@@ -22,7 +22,7 @@ export async function caixaRoutes(app: FastifyInstance) {
   );
   app.get('/historico', async (request, reply) => {
     try {
-      const historico = await knex('historico_caixa').select();
+      const historico = await knex('caixa').select();
       return { historico };
     } catch (error) {
       console.error(error);
