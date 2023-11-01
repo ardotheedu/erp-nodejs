@@ -44,7 +44,6 @@ export async function pedidoRoutes(app: FastifyInstance) {
       };
     }
   );
-
   app.post("/", async (request, reply) => {
     const createPedidoBodySchema = z.object({
       cliente_id_pedido: z.string(),

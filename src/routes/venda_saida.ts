@@ -47,6 +47,35 @@ export async function vendaSaidaRoutes(app: FastifyInstance) {
     }
   );
 
+  app.get('/relatorio', async (request) => {
+    try {
+      const query = request.query as RelatorioQuery
+      const data_inicial = query.data_inicial
+      const data_final = query.data_final
+      console.log(data_final)
+      const venda_saida = await knex('venda_saida')
+        .modify(function(queryBuilder)){
+          if(query.data_inicial){
+            queryBuilder.where('data_vencimento', '>=', query.data_inicial)
+          }
+        }
+        if(query.data_final){
+          queryBuilder.where('data_vencimento', '<', query.data_final)
+        }
+
+        .where({
+          status: query.status,
+        })
+        .where('data_saida', '=', data_inicial)
+        .where('data_saida', '<', data_final)
+        .select()
+      return {venda_saida}
+    } catch (error) {
+      console.error(error)
+      return { error: 'Erro ao buscar saida de vendas.' }
+    }
+  })
+
   // Endpoint para criar uma nova venda de saída
   app.post("/", async (request, reply) => {
     const createVendaSaidaBodySchema = z.object({
