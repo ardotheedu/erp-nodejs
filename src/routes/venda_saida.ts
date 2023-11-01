@@ -52,22 +52,21 @@ export async function vendaSaidaRoutes(app: FastifyInstance) {
       const query = request.query as RelatorioQuery
       const data_inicial = query.data_inicial
       const data_final = query.data_final
-      console.log(data_final)
+      console.log(data_inicial)
       const venda_saida = await knex('venda_saida')
-        .modify(function(queryBuilder)){
-          if(query.data_inicial){
-            queryBuilder.where('data_vencimento', '>=', query.data_inicial)
-          }
+      .modify(function (queryBuilder) {
+        if (query.data_inicial) {
+          queryBuilder.where('data_saida', '>=', query.data_inicial)
         }
-        if(query.data_final){
-          queryBuilder.where('data_vencimento', '<', query.data_final)
+        if (query.data_final) {
+          queryBuilder.where('data_saida', '<', query.data_final)
         }
-
-        .where({
-          status: query.status,
-        })
-        .where('data_saida', '=', data_inicial)
-        .where('data_saida', '<', data_final)
+        if (query.id) {
+          queryBuilder.where({
+            id: query.id,
+          })
+        }
+      })
         .select()
       return {venda_saida}
     } catch (error) {
