@@ -44,6 +44,15 @@ export async function pedidoRoutes(app: FastifyInstance) {
       };
     }
   );
+  app.get('/historico', async (request, reply) => {
+    try {
+      const historico = await knex('historico_pedido').select();
+      return { historico };
+    } catch (error) {
+      console.error(error);
+      return reply.status(500).send('Erro ao buscar o histórico de pedidos.');
+    }
+  });
 
   app.post("/", async (request, reply) => {
     const createPedidoBodySchema = z.object({
