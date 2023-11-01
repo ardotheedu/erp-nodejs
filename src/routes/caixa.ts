@@ -20,6 +20,15 @@ export async function caixaRoutes(app: FastifyInstance) {
       }
     }
   );
+  app.get('/historico', async (request, reply) => {
+    try {
+      const historico = await knex('historico_caixa').select();
+      return { historico };
+    } catch (error) {
+      console.error(error);
+      return reply.status(500).send('Erro ao buscar o histórico do caixa.');
+    }
+  });
 
   app.post('/', async (request, reply) => {
     const createCaixaBodySchema = z.object({
