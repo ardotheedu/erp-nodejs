@@ -19,12 +19,25 @@ export async function lancamentoRoutes(app: FastifyInstance) {
     }
   })
 
-  app.get('/relatorio', async (request) => {
+  app.get('/historico', async (request) => {
     try {
       const query = request.query as RelatorioQuery
+      const dataInicial = query.data_inicial
+      //   const dataFinal = moment(endDate).format('YYYY-MM-DDTHH:mm:ssZ')
+      //   console.log(dataFinal)
       const lancamentos = await knex('lancamento')
-        .where({
-          status: query.status,
+        .modify(function (queryBuilder) {
+          if (query.data_inicial) {
+            queryBuilder.where('data_vencimento', '>=', query.data_inicial)
+          }
+          if (query.data_final) {
+            queryBuilder.where('data_vencimento', '<', query.data_final)
+          }
+          if (query.status) {
+            queryBuilder.where({
+              status: query.status,
+            })
+          }
         })
         .select()
       return { lancamentos }
