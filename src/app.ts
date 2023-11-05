@@ -9,10 +9,10 @@ app.register(cookie)
 app.register(cors, {
   origin: '*',
 })
-app.register(routes.rhRoutes, {
-  prefix: 'rh',
-})
+
 app.register(routes.registerStockRoutes, { prefix: 'stock' })
+
+app.register(routes.registerRHRoutes, { prefix: 'rh' })
 
 app.register(routes.clienteRoutes, {
   prefix: 'cliente',
