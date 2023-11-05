@@ -1,5 +1,11 @@
 import { FastifyInstance } from 'fastify'
-import { all, create, getById } from '../Repositories/funcionarioRepository'
+import {
+  all,
+  create,
+  getById,
+  remove,
+  update,
+} from '../Repositories/funcionarioRepository'
 import { z } from 'zod'
 import { funcionario } from '../Entities/funcionario'
 
