@@ -1,45 +1,45 @@
-import fastify from 'fastify'
-import cookie from '@fastify/cookie'
-import * as routes from './routes/index'
-import cors from '@fastify/cors'
+import fastify from "fastify";
+import cookie from "@fastify/cookie";
+import * as routes from "./routes/index";
+import cors from "@fastify/cors";
 
-export const app = fastify()
+export const app = fastify();
 
-app.register(cookie)
+app.register(cookie);
 app.register(cors, {
-  origin: '*',
-})
+  origin: "*",
+});
 
-app.register(routes.registerStockRoutes, { prefix: 'stock' })
+app.register(routes.registerStockRoutes, { prefix: "stock" });
 
-app.register(routes.registerRHRoutes, { prefix: 'rh' })
+//app.register(routes.registerRHRoutes, { prefix: 'rh' })
 
 app.register(routes.clienteRoutes, {
-  prefix: 'cliente',
-})
+  prefix: "cliente",
+});
 
 app.register(routes.itemPedidoRoutes, {
-  prefix: 'item_pedido',
-})
+  prefix: "item_pedido",
+});
 
 app.register(routes.pedidoRoutes, {
-  prefix: 'pedido',
-})
+  prefix: "pedido",
+});
 
 app.register(routes.vendaSaidaRoutes, {
-  prefix: 'venda_saida',
-})
+  prefix: "venda_saida",
+});
 
 app.register(routes.lancamentoRoutes, {
-  prefix: 'lancamento',
-})
+  prefix: "lancamento",
+});
 
 app.register(routes.caixaRoutes, {
-  prefix: 'caixa',
-})
+  prefix: "caixa",
+});
 app.register(routes.permissaoRoutes, {
-  prefix: 'permissao',
-})
+  prefix: "permissao",
+});
 app.register(routes.movimentacaoCaixaRoutes, {
-  prefix: 'movimentacao_caixa',
-})
+  prefix: "movimentacao_caixa",
+});

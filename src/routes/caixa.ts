@@ -21,26 +21,51 @@ export async function caixaRoutes(app: FastifyInstance) {
     }
   );
 
-  app.get(
-    "/caixas-por-dia",
-    { preHandler: [checkSessionIdExists] },
-    async (request, reply) => {
-      try {
-        // Selecionar a data de abertura e o saldo de fechamento para cada caixa
-        const caixasPorDia = await knex("caixa")
-          .select(knex.raw("DATE(abertura) as data"), "saldo_fechamento")
-          .orderBy("data", "asc");
+  const querySchema = z.object({
+    dataInicio: z.date(),
+    dataFim: z.date(),
+  });
 
-        return reply.status(200).send(caixasPorDia);
+  // Rota para buscar caixas por intervalo de datas
+  app.get(
+    "/caixaPorPeriodo",
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (request, reply) => {
+      const validationResult = querySchema.safeParse(request.query);
+
+      if (!validationResult.success) {
+        return reply
+          .status(400)
+          .send({ error: "Parâmetros de consulta inválidos" });
+      }
+
+      const { dataInicio, dataFim } = validationResult.data;
+
+      try {
+        const caixas = await knex("caixa")
+          .where("abertura", ">=", new Date(dataInicio))
+          .andWhere("abertura", "<=", new Date(dataFim))
+          .select(
+            "abertura",
+            "fechamento",
+            "saldo_inicial",
+            "suprimento",
+            "sangria",
+            "saldo_atual",
+            "saldo_fechamento"
+          );
+
+        return reply.send(caixas);
       } catch (error) {
         console.error(error);
         return reply
           .status(500)
-          .send("Erro ao buscar os saldos de fechamento dos caixas por dia.");
+          .send("Erro ao buscar caixas no intervalo de datas especificado.");
       }
     }
   );
-
   app.post("/", async (request, reply) => {
     const createCaixaBodySchema = z.object({
       abertura: z.coerce.date(),
@@ -73,8 +98,10 @@ export async function caixaRoutes(app: FastifyInstance) {
       });
     }
 
+    const ID = randomUUID();
+
     await knex("caixa").insert({
-      ID: randomUUID(),
+      ID,
       abertura,
       fechamento,
       saldo_inicial,
@@ -94,47 +121,43 @@ export async function caixaRoutes(app: FastifyInstance) {
       preHandler: [checkSessionIdExists],
     },
     async (request, reply) => {
-      const updateCaixaBodySchema = z.object({
-        abertura: z.coerce.date(),
-        fechamento: z.union([z.coerce.date().optional(), z.null()]),
-        saldo_inicial: z.number(),
-        suprimento: z.union([z.number().optional(), z.null()]),
-        sangria: z.union([z.number().optional(), z.null()]),
-        saldo_atual: z.number(),
-        saldo_fechamento: z.union([z.number().optional(), z.null()]),
+      const updateCaixaParamsSchema = z.object({
+        id: z.string().uuid(),
       });
 
-      const {
-        abertura,
-        fechamento,
-        saldo_inicial,
-        suprimento,
-        sangria,
-        saldo_atual,
-        saldo_fechamento,
-      } = updateCaixaBodySchema.parse(request.body);
-
-      const { id } = request.params;
+      const updateCaixaBodySchema = z.object({
+        abertura: z.date(),
+        fechamento: z.date().optional().nullable(),
+        saldo_inicial: z.number(),
+        suprimento: z.number().optional().nullable(),
+        sangria: z.number().optional().nullable(),
+        saldo_atual: z.number(),
+        saldo_fechamento: z.number().optional().nullable(),
+      });
 
       try {
-        // Verifica se o ID existe antes de atualizar
-        const caixaInfo = await knex("caixa").where({ ID: id }).first();
+        const params = updateCaixaParamsSchema.safeParse(request.params);
+        if (!params.success) {
+          return reply.status(400).send({ error: "ID inválido." });
+        }
 
+        const { id } = params.data;
+
+        const body = updateCaixaBodySchema.safeParse(request.body);
+        if (!body.success) {
+          return reply
+            .status(400)
+            .send({ error: "Dados de entrada inválidos." });
+        }
+
+        const caixaInfo = await knex("caixa").where({ ID: id }).first();
         if (!caixaInfo) {
           return reply
             .status(404)
             .send("Informações do caixa não encontradas.");
         }
 
-        await knex("caixa").where({ ID: id }).update({
-          abertura,
-          fechamento,
-          saldo_inicial,
-          suprimento,
-          sangria,
-          saldo_atual,
-          saldo_fechamento,
-        });
+        await knex("caixa").where({ ID: id }).update(body.data);
 
         return reply.status(204).send();
       } catch (error) {
@@ -153,7 +176,16 @@ export async function caixaRoutes(app: FastifyInstance) {
       preHandler: [checkSessionIdExists],
     },
     async (request, reply) => {
-      const { id } = request.params;
+      const deleteCaixaParamsSchema = z.object({
+        id: z.string().uuid(),
+      });
+
+      const params = deleteCaixaParamsSchema.safeParse(request.params);
+      if (!params.success) {
+        return reply.status(400).send({ error: "ID inválido." });
+      }
+
+      const { id } = params.data;
 
       try {
         // Verifica se o ID existe antes de excluir

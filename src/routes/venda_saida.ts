@@ -47,33 +47,43 @@ export async function vendaSaidaRoutes(app: FastifyInstance) {
     }
   );
 
-  app.get('/relatorio', async (request) => {
+  app.get("/relatorio", async (request, reply) => {
     try {
-      const query = request.query as RelatorioQuery
-      const data_inicial = query.data_inicial
-      const data_final = query.data_final
-      console.log(data_inicial)
-      const venda_saida = await knex('venda_saida')
-      .modify(function (queryBuilder) {
-        if (query.data_inicial) {
-          queryBuilder.where('data_saida', '>=', query.data_inicial)
-        }
-        if (query.data_final) {
-          queryBuilder.where('data_saida', '<', query.data_final)
-        }
-        if (query.id) {
-          queryBuilder.where({
-            id: query.id,
-          })
-        }
-      })
-        .select()
-      return {venda_saida}
+      const relatorioQuerySchema = z.object({
+        data_inicial: z.string().optional(),
+        data_final: z.string().optional(),
+        id: z.string().optional(),
+      });
+
+      const queryResult = relatorioQuerySchema.safeParse(request.query);
+      if (!queryResult.success) {
+        return reply.status(400).send({ error: "Query inválida." });
+      }
+
+      const { data_inicial, data_final, id } = queryResult.data;
+
+      const venda_saida = await knex("venda_saida")
+        .modify(function (queryBuilder) {
+          if (data_inicial) {
+            queryBuilder.where("data_saida", ">=", data_inicial);
+          }
+          if (data_final) {
+            queryBuilder.where("data_saida", "<=", data_final);
+          }
+          if (id) {
+            queryBuilder.where({ id });
+          }
+        })
+        .select();
+
+      return reply.send({ venda_saida });
     } catch (error) {
-      console.error(error)
-      return { error: 'Erro ao buscar saida de vendas.' }
+      console.error(error);
+      return reply
+        .status(500)
+        .send({ error: "Erro ao buscar saida de vendas." });
     }
-  })
+  });
 
   // Endpoint para criar uma nova venda de saída
   app.post("/", async (request, reply) => {

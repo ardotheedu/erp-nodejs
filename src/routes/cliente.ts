@@ -123,21 +123,27 @@ export async function clienteRoutes(app: FastifyInstance) {
     }
   });
 
-  app.delete("/:id", async (request, reply) => {
-    const deleteClienteParamsSchema = z.object({
-      id: z.string().uuid(),
-    });
+  app.delete(
+    "/:id",
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (request, reply) => {
+      const deleteClienteParamsSchema = z.object({
+        id: z.string().uuid(),
+      });
 
-    try {
-      const { id } = deleteClienteParamsSchema.parse(request.params);
+      try {
+        const { id } = deleteClienteParamsSchema.parse(request.params);
 
-      await knex("cliente").where({ id }).del();
+        await knex("cliente").where({ id }).del();
 
-      return reply
-        .status(200)
-        .send({ message: "Cliente excluído com sucesso!" });
-    } catch (error) {
-      return reply.status(400).send({ message: "Erro ao excluir cliente." });
+        return reply
+          .status(200)
+          .send({ message: "Cliente excluído com sucesso!" });
+      } catch (error) {
+        return reply.status(400).send({ message: "Erro ao excluir cliente." });
+      }
     }
-  });
+  );
 }
