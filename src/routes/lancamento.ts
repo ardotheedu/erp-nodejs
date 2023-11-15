@@ -3,6 +3,10 @@ import { z } from 'zod'
 import { randomUUID } from 'node:crypto'
 import { knex } from '../database'
 import { checkSessionIdExists } from '../middlewares/check-session-id-exists'
+import dayjs from 'dayjs'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
+
+dayjs.extend(customParseFormat)
 interface RelatorioQuery {
   status: string
   data_inicial: string
@@ -22,19 +26,22 @@ export async function lancamentoRoutes(app: FastifyInstance) {
   app.get('/historico', async (request) => {
     try {
       const query = request.query as RelatorioQuery
-      const dataInicial = query.data_inicial
-      //   const dataFinal = moment(endDate).format('YYYY-MM-DDTHH:mm:ssZ')
-      //   console.log(dataFinal)
+      console.log(query.data_final)
+      const dataInicial = dayjs(query.data_inicial, 'DD/MM/YYYY').format()
+      console.log(dataInicial)
+      const dataFinal = dayjs(query.data_final, 'DD/MM/YYYY').format()
       const lancamentos = await knex('lancamento')
         .modify(function (queryBuilder) {
           if (query.data_inicial) {
-            queryBuilder.where('data_vencimento', '>=', query.data_inicial)
+            queryBuilder.where('data_vencimento', '>=', dataInicial)
           }
+
           if (query.data_final) {
-            queryBuilder.where('data_vencimento', '<', query.data_final)
+            queryBuilder.andWhere('data_vencimento', '<', dataFinal)
           }
+
           if (query.status) {
-            queryBuilder.where({
+            queryBuilder.andWhere({
               status: query.status,
             })
           }
