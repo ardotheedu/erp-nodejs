@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { knex } from '../database';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
+import { randomUUID } from "node:crypto";
+import { checkSessionIdExists } from "../middlewares/check-session-id-exists";
 
 dayjs.extend(customParseFormat);
 interface RelatorioQuery {
