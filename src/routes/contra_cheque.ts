@@ -1,14 +1,12 @@
-import { FastifyInstance } from 'fastify'
-import { z } from 'zod'
-import { randomUUID } from 'node:crypto'
-import { knex } from '../database'
-import { checkSessionIdExists } from '../middlewares/check-session-id-exists'
-import dayjs from 'dayjs'
-import customParseFormat from 'dayjs/plugin/customParseFormat'
+import { FastifyInstance } from 'fastify';
+import { z } from 'zod';
+import { knex } from '../database';
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
 
-dayjs.extend(customParseFormat)
+dayjs.extend(customParseFormat);
 interface RelatorioQuery {
-  data_emissao:string
+  data_emissao: string;
 }
 
 export async function contraChequeRoutes(app: FastifyInstance) {
@@ -30,10 +28,15 @@ export async function contraChequeRoutes(app: FastifyInstance) {
   
     try {
       const { id_funcionario, data_emissao } = getContraChequesParamsSchema.parse(request.params);
-  
+
+      const dataInicial = dayjs(data_emissao, 'DD/MM/YYYY').startOf('month').format();
+      const dataFinal = dayjs(data_emissao, 'DD/MM/YYYY').endOf('month').format();
+
       const contraCheques = await knex('contra_cheque')
         .select('*')
-        .where({ id_funcionario, data_emissao });
+        .where({ id_funcionario })
+        .andWhere('data_emissao', '>=', dataInicial)
+        .andWhere('data_emissao', '<=', dataFinal);
   
       return { contraCheques };
     } catch (error) {

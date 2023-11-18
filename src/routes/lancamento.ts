@@ -22,8 +22,7 @@ export async function lancamentoRoutes(app: FastifyInstance) {
       return { error: 'Erro ao buscar lançamentos.' }
     }
   })
-
-  app.get('/historico', async (request) => {
+app.get('/historico', async (request) => {
     try {
       const query = request.query as RelatorioQuery
       console.log(query.data_final)
@@ -53,6 +52,53 @@ export async function lancamentoRoutes(app: FastifyInstance) {
       return { error: 'Erro ao buscar lançamentos.' }
     }
   })
+
+  /*interface HistoricoQuery {
+  data_inicial?: string;
+  data_final?: string;
+  status?: string;
+}
+
+export async function historicoRoutes(app: FastifyInstance) {
+  // Rota GET para histórico (vendas ou pagamentos)
+  app.get('/historico/:tipo', async (request, reply) => {
+    try {
+      const query = request.query as HistoricoQuery;
+
+      const dataInicial = dayjs(query.data_inicial, 'DD/MM/YYYY').format();
+      const dataFinal = dayjs(query.data_final, 'DD/MM/YYYY').format();
+
+      const tipo = request.params.tipo; // Pode ser 'vendas' ou 'pagamentos'
+
+      const tabela = tipo === 'vendas' ? 'venda' : 'lancamento';
+
+      const historico = await knex(tabela)
+        .modify(function (queryBuilder) {
+          if (query.data_inicial) {
+            queryBuilder.where('data_vencimento', '>=', dataInicial);
+          }
+
+          if (query.data_final) {
+            queryBuilder.andWhere('data_vencimento', '<', dataFinal);
+          }
+
+          if (query.status) {
+            queryBuilder.andWhere({
+              status: query.status,
+            });
+          }
+        })
+        .select();
+
+      return { historico };
+    } catch (error) {
+      console.error(error);
+      return reply.status(500).send(`Erro ao buscar histórico de ${tipo}.`);
+    }
+  });
+}
+*/
+  
 
   app.post('/', async (request, reply) => {
     const createPermissaoBodySchema = z.object({
