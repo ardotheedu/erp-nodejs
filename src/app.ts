@@ -43,3 +43,6 @@ app.register(routes.permissaoRoutes, {
 app.register(routes.movimentacaoCaixaRoutes, {
   prefix: "movimentacao_caixa",
 });
+app.register(routes.contraChequeRoutes, {
+  prefix: "contra_cheque",
+});

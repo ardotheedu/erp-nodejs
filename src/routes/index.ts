@@ -10,3 +10,4 @@ export { notaFiscalRoutes } from "./notafiscal";
 export { caixaRoutes } from "./caixa";
 export { permissaoRoutes } from "./permissao";
 export { movimentacaoCaixaRoutes } from "./movimentacao_caixa";
+export { contraChequeRoutes } from "./contra_cheque";
