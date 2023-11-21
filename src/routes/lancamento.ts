@@ -22,12 +22,10 @@ export async function lancamentoRoutes(app: FastifyInstance) {
       return { error: 'Erro ao buscar lançamentos.' }
     }
   })
-app.get('/historico', async (request) => {
+  app.get('/historico', async (request) => {
     try {
       const query = request.query as RelatorioQuery
-      console.log(query.data_final)
       const dataInicial = dayjs(query.data_inicial, 'DD/MM/YYYY').format()
-      console.log(dataInicial)
       const dataFinal = dayjs(query.data_final, 'DD/MM/YYYY').format()
       const lancamentos = await knex('lancamento')
         .modify(function (queryBuilder) {
@@ -53,7 +51,7 @@ app.get('/historico', async (request) => {
     }
   })
 
-  /*interface HistoricoQuery {
+  /* interface HistoricoQuery {
   data_inicial?: string;
   data_final?: string;
   status?: string;
@@ -98,7 +96,6 @@ export async function historicoRoutes(app: FastifyInstance) {
   });
 }
 */
-  
 
   app.post('/', async (request, reply) => {
     const createPermissaoBodySchema = z.object({

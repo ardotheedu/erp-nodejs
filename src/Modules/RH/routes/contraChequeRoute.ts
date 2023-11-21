@@ -5,18 +5,31 @@ import {
   getById,
   update,
   remove,
+  getContracheque,
 } from '../Repositories/contraChequeRepository'
 import { z } from 'zod'
 import { contraCheque } from '../Entities/contraCheque'
+import dayjs from 'dayjs'
 
 export async function contraChequeRoutes(app: FastifyInstance) {
   app.get('/', async (request, reply) => {
     try {
-      const contraCheque = await all()
+      const contraCheque = await getContracheque(request.query)
       return reply.status(201).send(contraCheque)
     } catch (error) {
       console.error(error)
       return { error: 'Erro ao obter usuários' }
+    }
+  })
+
+  app.get('/historico', async (request, reply) => {
+    try {
+      const contraChequeFuncionario = await getContracheque(request.query)
+      console.log(contraChequeFuncionario)
+      return reply.status(201).send(contraChequeFuncionario)
+    } catch (error) {
+      console.error(error)
+      return { error: 'Erro ao buscar lançamentos.' }
     }
   })
 
