@@ -3,6 +3,9 @@ import { z } from "zod";
 import { randomUUID } from "node:crypto";
 import { knex } from "../database";
 import { checkSessionIdExists } from "../middlewares/check-session-id-exists";
+const dayjs = require("dayjs");
+const customParseFormat = require("dayjs/plugin/customParseFormat");
+dayjs.extend(customParseFormat);
 
 export async function caixaRoutes(app: FastifyInstance) {
   app.get(
@@ -22,8 +25,16 @@ export async function caixaRoutes(app: FastifyInstance) {
   );
 
   const querySchema = z.object({
-    dataInicio: z.date(),
-    dataFim: z.date(),
+    dataInicio: z
+      .string()
+      .refine((data) => dayjs(data, "DD/MM/YYYY", true).isValid(), {
+        message: "dataInicio deve estar no formato DD/MM/YYYY",
+      }),
+    dataFim: z
+      .string()
+      .refine((data) => dayjs(data, "DD/MM/YYYY", true).isValid(), {
+        message: "dataFim deve estar no formato DD/MM/YYYY",
+      }),
   });
 
   // Rota para buscar caixas por intervalo de datas
@@ -33,20 +44,26 @@ export async function caixaRoutes(app: FastifyInstance) {
       preHandler: [checkSessionIdExists],
     },
     async (request, reply) => {
+      // Valida os parâmetros de consulta com o esquema definido
       const validationResult = querySchema.safeParse(request.query);
 
+      // Verifica se a validação foi bem-sucedida
       if (!validationResult.success) {
         return reply
           .status(400)
           .send({ error: "Parâmetros de consulta inválidos" });
       }
 
+      // Extrai e formata as datas usando dayjs para o formato local
       const { dataInicio, dataFim } = validationResult.data;
+      const formattedDataInicio = dayjs(dataInicio, "DD/MM/YYYY").format();
+      const formattedDataFim = dayjs(dataFim, "DD/MM/YYYY").format();
 
       try {
+        // Realiza a consulta ao banco de dados usando os valores formatados
         const caixas = await knex("caixa")
-          .where("abertura", ">=", new Date(dataInicio))
-          .andWhere("abertura", "<=", new Date(dataFim))
+          .where("abertura", ">=", formattedDataInicio)
+          .andWhere("abertura", "<=", formattedDataFim)
           .select(
             "abertura",
             "fechamento",
@@ -57,8 +74,10 @@ export async function caixaRoutes(app: FastifyInstance) {
             "saldo_fechamento"
           );
 
+        // Retorna os resultados da consulta
         return reply.send(caixas);
       } catch (error) {
+        // Trata erros durante a consulta ao banco de dados
         console.error(error);
         return reply
           .status(500)
@@ -66,6 +85,7 @@ export async function caixaRoutes(app: FastifyInstance) {
       }
     }
   );
+
   app.post("/", async (request, reply) => {
     const createCaixaBodySchema = z.object({
       abertura: z.coerce.date(),
