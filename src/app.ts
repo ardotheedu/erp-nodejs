@@ -14,6 +14,8 @@ app.register(routes.registerStockRoutes, { prefix: 'stock' })
 
 app.register(routes.registerRHRoutes, { prefix: 'rh' })
 
+app.register(routes.dashboardRoutes, { prefix: 'dashboard' })
+
 app.register(routes.clienteRoutes, {
   prefix: 'cliente',
 })
