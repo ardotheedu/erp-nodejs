@@ -1,5 +1,6 @@
-import { foodRoutes } from '../routes/foodRoute'
+import { foodRoutes } from './foodRoute'
+import { FastifyInstance } from 'fastify'
 
-export async function registerRHRoutes(app: FastifyInstance) {
-  app.register(foodRoutes, { prefix: 'alimentos' })
+export async function registerFoodRoutes(app: FastifyInstance) {
+  app.register(foodRoutes)
 }

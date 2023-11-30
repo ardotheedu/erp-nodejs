@@ -1,8 +1,8 @@
 import { FastifyInstance } from 'fastify'
 import { funcionarioRoutes } from './funcionarioRoute'
 import { permissaoRoutes } from './permissaoRoute'
-import { dadosBancariosRoutes } from '../routes/dadosBancariosRoute'
-import { contraChequeRoutes } from '../routes/contraChequeRoute'
+import { dadosBancariosRoutes } from './dadosBancariosRoute'
+import { contraChequeRoutes } from './contraChequeRoute'
 
 export async function registerRHRoutes(app: FastifyInstance) {
   app.register(funcionarioRoutes, { prefix: 'funcionarios' })

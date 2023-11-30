@@ -1,23 +1,24 @@
-import { Knex } from "knex";
+import dayjs from 'dayjs'
+import { Knex } from 'knex'
 
 export async function seed(knex: Knex): Promise<void> {
-  await knex("alimentos_saida").del();
+  await knex('saida_alimentos').del()
 
-  await knex("alimentos_saida").insert([
+  await knex('saida_alimentos').insert([
     {
-      id_alimento: 1,
-      id_saida: 1,
-      quantidade: 10.0,
+      alimento_id: 1,
+      quantidade: 10,
+      data_saida: dayjs('22/07/2023', 'DD/MM/YYYY').format(),
     },
     {
-      id_alimento: 2,
-      id_saida: 2,
-      quantidade: 20.0,
+      alimento_id: 2,
+      quantidade: 20,
+      data_saida: dayjs('23/07/2023', 'DD/MM/YYYY').format(),
     },
     {
-      id_alimento: 3,
-      id_saida: 3,
-      quantidade: 30.0,
+      alimento_id: 3,
+      quantidade: 30,
+      data_saida: dayjs('24/07/2023', 'DD/MM/YYYY').format(),
     },
-  ]);
+  ])
 }

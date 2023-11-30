@@ -91,7 +91,7 @@ export async function registrarSaida(
 }
 
 export async function all(): Promise<Alimento[]> {
-  const food = await knex<Alimento>('food').select()
+  const food = await knex<Alimento>('alimentos').select()
   return food
 }
 
@@ -111,9 +111,8 @@ export async function getById(id: string): Promise<Alimento> {
 }
 
 export async function create(food: Alimento): Promise<void> {
-  food.id = randomUUID()
-  await knex('alimentos').insert({
-    id: food.id,
+  food.id = await knex('alimentos').insert({
+    id: randomUUID(),
     unidade_medida: food.unidade_medida,
     quantidade_estoque: food.quantidade_em_estoque,
   })
