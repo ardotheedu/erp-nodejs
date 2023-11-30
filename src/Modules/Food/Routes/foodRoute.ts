@@ -43,10 +43,8 @@ export async function foodRoutes(app: FastifyInstance) {
   app.post('/criar', async (request, reply) => {
     try {
       const foodSchema = z.object({
-        id: z.string().uuid(),
         nome: z.string(),
         unidade_medida: z.string(),
-        quantidade_em_estoque: z.number(),
       })
 
       const food = foodSchema.parse(request.body)
@@ -64,7 +62,6 @@ export async function foodRoutes(app: FastifyInstance) {
         id: z.string().uuid(),
         nome: z.string(),
         unidade_medida: z.string(),
-        quantidade_em_estoque: z.number(),
       })
 
       const food = foodSchema.parse(request.body)
@@ -100,8 +97,8 @@ export async function foodRoutes(app: FastifyInstance) {
       const entradaSchema = z.object({
         alimento_id: z.string().uuid(),
         quantidade: z.number(),
-        data_entrada: z.coerce.date(),
-        data_vencimento: z.coerce.date(),
+        data_entrada: z.string(),
+        data_vencimento: z.string(),
       })
 
       const entrada = entradaSchema.parse(request.body)
