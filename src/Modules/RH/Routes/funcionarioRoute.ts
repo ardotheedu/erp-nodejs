@@ -5,36 +5,37 @@ import {
   getById,
   remove,
   update,
+  login,
 } from '../Repositories/funcionarioRepository'
 import { z } from 'zod'
 import { funcionario } from '../Entities/funcionario'
 
 export async function funcionarioRoutes(app: FastifyInstance) {
-  //   app.post('/login', async (request, reply) => {
-  //     // Verifique as credenciais (substitua pelo seu próprio mecanismo de autenticação)
-  //     const auth = z.object({
-  //       email: z.string(),
-  //       senha: z.string(),
-  //     })
+  app.post('/login', async (request, reply) => {
+    // Verifique as credenciais (substitua pelo seu próprio mecanismo de autenticação)
+    const auth = z.object({
+      email: z.string(),
+      senha: z.string(),
+    })
 
-  //     const { email, senha } = auth.parse(request.body)
+    const { email, senha } = auth.parse(request.body)
+    console.log()
+    const funcionario = await login(email, senha)
 
-  //     const funcionario = await login(email, senha);
-
-  // 	if (funcionario) {
-  // 	  reply
-  // 		.setCookie('sessionId', funcionario.token, {
-  // 		  path: '/',
-  // 		  httpOnly: true,
-  // 		  secure: true,
-  // 		  sameSite: 'none',
-  // 		})
-  // 		.status(201)
-  // 		.send({ message: 'Usuário logado com sucesso' })
-  // 	} else {
-  // 	  reply.status(401).send({ error: 'Credenciais inválidas' })
-  // 	}
-  //   })
+    if (funcionario) {
+      reply
+        .setCookie('sessionId', funcionario.token, {
+          path: '/',
+          httpOnly: true,
+          secure: true,
+          sameSite: 'none',
+        })
+        .status(201)
+        .send({ message: 'Usuário logado com sucesso' })
+    } else {
+      reply.status(401).send({ error: 'Credenciais inválidas' })
+    }
+  })
   app.get('/', async (request, reply) => {
     try {
       const funcionarios = await all()

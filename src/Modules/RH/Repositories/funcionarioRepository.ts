@@ -1,44 +1,45 @@
 import { UUID, randomUUID } from 'node:crypto'
 import { knex } from '../../../database'
 import { funcionario } from '../Entities/funcionario'
+import { sign } from 'jsonwebtoken'
 
-// interface funcionarioWithToken {
-//   user: funcionario
-//   token: string
-// }
+interface funcionarioWithToken {
+  user: funcionario
+  token: string
+}
 export async function all(): Promise<funcionario[]> {
   const funcionario = await knex<funcionario>('funcionario').select()
   return funcionario
 }
 
-// export async function login(
-//   email: string,
-//   senha: string,
-// ): Promise<funcionarioWithToken> {
-//   const usuario = await knex('funcionario').where({ email }).first()
+export async function login(
+  email: string,
+  senha: string,
+): Promise<funcionarioWithToken> {
+  const usuario = await knex('funcionario').where({ email }).first()
 
-//   if (!usuario) {
-//     reply.status(401).send({ error: 'Credenciais inválidas' })
-//     return
-//   }
+  if (!usuario) {
+    return { error: 'Credenciais inválidas' }
+    return
+  }
 
-//   if (usuario.senha === senha) {
-//     const userPermission = await knex('funcionario')
-//       .select('permissao.nome')
-//       .leftJoin('permissao', 'funcionario.papel_id', 'permissao.id')
-//       .where('funcionario.id', usuario.id)
-//       .first()
+  if (usuario.senha === senha) {
+    const userPermission = await knex('funcionario')
+      .select('permissao.nome')
+      .leftJoin('permissao', 'funcionario.papel_id', 'permissao.id')
+      .where('funcionario.id', usuario.id)
+      .first()
 
-//     const token = sign(
-//       { user: { ...usuario, role: userPermission.nome } },
-//       env.SECRETKEY,
-//       { expiresIn: '1h' },
-//     )
-//     return { user: usuario, token }
-//   } else {
-//     reply.status(401).send({ error: 'Credenciais inválidas' })
-//   }
-// }
+    const token = sign(
+      { user: { ...usuario, role: userPermission.nome } },
+      env.SECRETKEY,
+      { expiresIn: '1h' },
+    )
+    return { user: usuario, token }
+  } else {
+    return { error: 'Credenciais inválidas' }
+  }
+}
 
 export async function getById(id: string): Promise<funcionario> {
   try {
