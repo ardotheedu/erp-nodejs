@@ -8,17 +8,17 @@ export async function seed(knex: Knex): Promise<void> {
     {
       alimento_id: 1,
       quantidade: 10,
-      data_saida: dayjs('22/07/2023', 'DD/MM/YYYY').format(),
+      data_saida: dayjs('2023/07/22', 'YYYY/MM/DD').format(),
     },
     {
       alimento_id: 2,
       quantidade: 20,
-      data_saida: dayjs('23/07/2023', 'DD/MM/YYYY').format(),
+      data_saida: dayjs('2023/07/23', 'YYYY/MM/DD').format(),
     },
     {
       alimento_id: 3,
       quantidade: 30,
-      data_saida: dayjs('24/07/2023', 'DD/MM/YYYY').format(),
+      data_saida: dayjs('2023/07/24', 'YYYY/MM/DD').format(),
     },
   ])
 }

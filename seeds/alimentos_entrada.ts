@@ -7,20 +7,20 @@ export async function seed(knex: Knex): Promise<void> {
   await knex('entrada_alimentos').insert([
     {
       alimento_id: 1,
-      data_vencimento: dayjs('22/07/2023', 'DD/MM/YYYY').format(),
-      data_entrada: dayjs('25/08/2023', 'DD/MM/YYYY').format(),
+      data_vencimento: dayjs('2023/07/22', 'YYYY/MM/DD').format(),
+      data_entrada: dayjs('2023/08/25', 'YYYY/MM/DD').format(),
       quantidade: 100,
     },
     {
       alimento_id: 2,
-      data_vencimento: dayjs('24/07/2023', 'DD/MM/YYYY').format(),
-      data_entrada: dayjs('25/09/2023', 'DD/MM/YYYY').format(),
+      data_vencimento: dayjs('2023/07/24', 'YYYY/MM/DD').format(),
+      data_entrada: dayjs('2023/09/25', 'YYYY/MM/DD').format(),
       quantidade: 150,
     },
     {
       alimento_id: 3,
-      data_vencimento: dayjs('22/08/2023', 'DD/MM/YYYY').format(),
-      data_entrada: dayjs('25/09/2023', 'DD/MM/YYYY').format(),
+      data_vencimento: dayjs('2023/08/22', 'YYYY/MM/DD').format(),
+      data_entrada: dayjs('2023/09/25', 'YYYY/MM/DD').format(),
       quantidade: 200,
     },
   ])
