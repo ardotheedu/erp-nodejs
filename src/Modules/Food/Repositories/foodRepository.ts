@@ -25,10 +25,10 @@ export async function relatorioEntrada(params: Relatorio): Promise<any> {
   try {
     const { data_inicial, data_final } = params
 
-    const dataInicial = dayjs(data_inicial, 'DD/MM/YYYY')
+    const dataInicial = dayjs(data_inicial, 'YYYY/MM/DD')
       .startOf('month')
       .format()
-    const dataFinal = dayjs(data_final, 'DD/MM/YYYY').endOf('month').format()
+    const dataFinal = dayjs(data_final, 'YYYY/MM/DD').endOf('month').format()
 
     const entradas = await knex('entrada_alimentos')
       .select('*')
@@ -45,8 +45,8 @@ export async function relatorioSaida(params: Relatorio): Promise<any> {
   try {
     const { data } = params
 
-    const dataInicial = dayjs(data, 'DD/MM/YYYY').startOf('month').format()
-    const dataFinal = dayjs(data, 'DD/MM/YYYY').endOf('month').format()
+    const dataInicial = dayjs(data, 'YYYY/MM/DD').startOf('month').format()
+    const dataFinal = dayjs(data, 'YYYY/MM/DD').endOf('month').format()
 
     const saidas = await knex('saida_alimentos')
       .select('*')
@@ -77,8 +77,8 @@ export async function darEntrada(params: OperacaoEntradaParams): Promise<void> {
           : quantidade,
       })
 
-    const dataVencimento = dayjs(data_vencimento, 'DD/MM/YYYY').format()
-    const dataEntrada = dayjs(data_entrada, 'DD/MM/YYYY').format()
+    const dataVencimento = dayjs(data_vencimento, 'YYYY/MM/DD').format()
+    const dataEntrada = dayjs(data_entrada, 'YYYY/MM/DD').format()
     await knex('entrada_alimentos').insert({
       alimento_id,
       data_vencimento: dataVencimento,
@@ -110,7 +110,7 @@ export async function registrarSaida(
           : 0,
       })
 
-    const dataSaida = dayjs(data_saida, 'DD/MM/YYYY').format()
+    const dataSaida = dayjs(data_saida, 'YYYY/MM/DD').format()
 
     await knex('saidas').insert({
       alimento_id,
