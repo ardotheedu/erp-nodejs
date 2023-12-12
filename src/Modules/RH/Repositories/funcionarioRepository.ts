@@ -2,6 +2,7 @@ import { UUID, randomUUID } from 'node:crypto'
 import { knex } from '../../../database'
 import { funcionario } from '../Entities/funcionario'
 import { sign } from 'jsonwebtoken'
+import { env } from '../../../env'
 
 interface funcionarioWithToken {
   user: funcionario
