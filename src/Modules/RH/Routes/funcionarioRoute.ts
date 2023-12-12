@@ -22,7 +22,7 @@ export async function funcionarioRoutes(app: FastifyInstance) {
     console.log()
     const funcionario = await login(email, senha)
 
-    if (funcionario) {
+    if (funcionario?.user) {
       reply
         .setCookie('sessionId', funcionario.token, {
           path: '/',
