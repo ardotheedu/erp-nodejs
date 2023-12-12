@@ -23,9 +23,7 @@ export async function getById(id: string): Promise<permissao> {
 }
 
 export async function create(permissao: permissao): Promise<void> {
-  permissao.id = randomUUID()
   await knex('permissao').insert({
-    id: permissao.id,
     nome: permissao.nome,
   })
 }

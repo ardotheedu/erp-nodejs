@@ -7,7 +7,7 @@ export async function seed(knex: Knex): Promise<void> {
 
   // Inserts seed entries
   await knex('permissao').insert([
-    { id: '123435', nome: 'admin' },
-    { id: '1234365', nome: 'user' },
+    { id: randomUUID(), nome: 'admin' },
+    { id: randomUUID(), nome: 'user' },
   ])
 }

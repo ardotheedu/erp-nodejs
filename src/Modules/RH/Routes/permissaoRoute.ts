@@ -5,7 +5,7 @@ import {
   getById,
   remove,
   update,
-} from '../Repositories/funcionarioRepository'
+} from '../Repositories/permissaoRepository'
 import { z } from 'zod'
 
 import { permissao } from '../Entities/permissao'

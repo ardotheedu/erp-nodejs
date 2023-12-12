@@ -149,7 +149,7 @@ export async function create(food: Alimento): Promise<void> {
     id: randomUUID(),
     nome: food.nome,
     unidade_medida: food.unidade_medida,
-    quantidade_em_estoque: 0,
+    quantidade_em_estoque: food.quantidade_em_estoque,
   })
 }
 
