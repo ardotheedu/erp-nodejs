@@ -1,73 +1,73 @@
-// src/routes/alimentos_saida.ts
+// src/routes/alimentos_entrada.ts
 import { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { knex } from "../database";
 import { checkSessionIdExists } from "../middlewares/check-session-id-exists";
 
-export async function alimentosSaidaRoutes(app: FastifyInstance) {
+export async function entradaAlimentosRoutes(app: FastifyInstance) {
   app.get(
-    "/alimentos-saida",
+    "/",
     {
       preHandler: [checkSessionIdExists],
     },
     async (request, reply) => {
       try {
-        const alimentosSaida = await knex("alimentos_saida").select();
-        return reply.send(alimentosSaida);
+        const alimentosEntrada = await knex("entrada_alimentos").select();
+        return reply.send(alimentosEntrada);
       } catch (error) {
         console.error(error);
         return reply
           .status(500)
-          .send({ error: "Erro ao buscar saídas de alimentos." });
+          .send({ error: "Erro ao buscar entradas de alimentos." });
       }
     }
   );
 
   app.get(
-    "/relatorio-saida",
+    "/relatorio-entrada",
     {
       preHandler: [checkSessionIdExists],
     },
     async (request, reply) => {
       try {
-        const relatorioSaida = await knex("alimentos_saida")
-          .join("alimentos", "alimentos.id", "alimentos_saida.id_alimento")
-          .join("saida", "saida.id", "alimentos_saida.id_saida")
+        const relatorioEntrada = await knex("entrada_alimentos")
+          .join("alimentos", "alimentos.id", "entrada_alimentos.id_alimento")
+          .join("entrada", "entrada.id", "entrada_alimentos.id_entrada")
           .select(
             "alimentos.nome as NomeAlimento",
-            "saida.data as DataSaida",
-            "saida.hora as HoraSaida",
-            "alimentos_saida.quantidade as QuantidadeSaida"
+            "entrada.data as DataEntrada",
+            "entrada.hora as HoraEntrada",
+            "entrada-alimentos.quantidade as QuantidadeEntrada"
           );
-        return reply.send(relatorioSaida);
+        return reply.send(relatorioEntrada);
       } catch (error) {
         console.error(error);
         return reply
           .status(500)
-          .send({ error: "Erro ao gerar relatório de saída." });
+          .send({ error: "Erro ao gerar relatório de entrada." });
       }
     }
   );
 
   app.post(
-    "/alimentos-saida",
+    "/",
     {
       preHandler: [checkSessionIdExists],
     },
     async (request, reply) => {
-      const saidaSchema = z.object({
+      const entradaSchema = z.object({
         id_alimento: z.number(),
-        id_saida: z.number(),
+        id_entrada: z.number(),
         quantidade: z.number(),
       });
 
-      const result = saidaSchema.safeParse(request.body);
+      const result = entradaSchema.safeParse(request.body);
       if (!result.success) {
         return reply.status(400).send({ error: "Dados de entrada inválidos" });
       }
 
       try {
-        const newId = await knex("alimentos_saida")
+        const newId = await knex("alimentos_entrada")
           .insert(result.data)
           .returning("id");
         return reply.status(201).send({ id: newId });
@@ -75,73 +75,73 @@ export async function alimentosSaidaRoutes(app: FastifyInstance) {
         console.error(error);
         return reply
           .status(500)
-          .send({ error: "Erro ao adicionar saída de alimentos." });
+          .send({ error: "Erro ao adicionar entrada de alimentos." });
       }
     }
   );
 
+  // PUT para atualizar uma entrada existente
   app.put(
-    "/alimentos-saida/:id",
+    "/entrada_alimentos/:id",
     {
       preHandler: [checkSessionIdExists],
     },
     async (request, reply) => {
-      const updateSaidaParamsSchema = z.object({
+      const updateEntradaParamsSchema = z.object({
         id: z.string().uuid(),
       });
 
-      const updateSaidaBodySchema = z.object({
+      const updateEntradaBodySchema = z.object({
         id_alimento: z.number().optional(),
-        id_saida: z.number().optional(),
+        id_entrada: z.number().optional(),
         quantidade: z.number().optional(),
       });
 
       try {
-        const params = updateSaidaParamsSchema.safeParse(request.params);
+        const params = updateEntradaParamsSchema.safeParse(request.params);
         if (!params.success) {
           return reply.status(400).send({ error: "ID inválido." });
         }
 
         const { id } = params.data;
 
-        const body = updateSaidaBodySchema.safeParse(request.body);
+        const body = updateEntradaBodySchema.safeParse(request.body);
         if (!body.success) {
           return reply
             .status(400)
             .send({ error: "Dados de entrada inválidos." });
         }
 
-        const saidaInfo = await knex("alimentos_saida")
+        const entradaInfo = await knex("entrada_alimentos")
           .where({ ID: id })
           .first();
-        if (!saidaInfo) {
-          return reply.status(404).send("Saída de alimentos não encontrada.");
+        if (!entradaInfo) {
+          return reply.status(404).send("Entrada de alimentos não encontrada.");
         }
 
-        await knex("alimentos_saida").where({ ID: id }).update(body.data);
+        await knex("entrada_alimentos").where({ ID: id }).update(body.data);
 
         return reply.status(204).send();
       } catch (error) {
         console.error(error);
         return reply
           .status(500)
-          .send("Erro ao atualizar a saída de alimentos.");
+          .send("Erro ao atualizar a entrada de alimentos.");
       }
     }
   );
 
-  // DELETE para remover uma saída
   app.delete(
-    "/alimentos-saida/:id",
+    "/entrada_alimentos/:id",
     {
       preHandler: [checkSessionIdExists],
     },
     async (request, reply) => {
-      const deleteSaidaParamsSchema = z.object({
+      const deleteEntradaParamsSchema = z.object({
         id: z.string().uuid(),
       });
 
-      const params = deleteSaidaParamsSchema.safeParse(request.params);
+      const params = deleteEntradaParamsSchema.safeParse(request.params);
       if (!params.success) {
         return reply.status(400).send({ error: "ID inválido." });
       }
@@ -149,19 +149,21 @@ export async function alimentosSaidaRoutes(app: FastifyInstance) {
       const { id } = params.data;
 
       try {
-        const saidaInfo = await knex("alimentos_saida")
+        const entradaInfo = await knex("entrada_alimentos")
           .where({ ID: id })
           .first();
-        if (!saidaInfo) {
-          return reply.status(404).send("Saída de alimentos não encontrada.");
+        if (!entradaInfo) {
+          return reply.status(404).send("Entrada de alimentos não encontrada.");
         }
 
-        await knex("alimentos_saida").where({ ID: id }).del();
+        await knex("entrada_alimentos").where({ ID: id }).del();
 
         return reply.status(204).send();
       } catch (error) {
         console.error(error);
-        return reply.status(500).send("Erro ao excluir a saída de alimentos.");
+        return reply
+          .status(500)
+          .send("Erro ao excluir a entrada de alimentos.");
       }
     }
   );
