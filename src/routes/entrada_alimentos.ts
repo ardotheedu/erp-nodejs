@@ -4,6 +4,13 @@ import { z } from "zod";
 import { knex } from "../database";
 import { checkSessionIdExists } from "../middlewares/check-session-id-exists";
 
+interface RelatorioQueryParams {
+  data_vencimento?: string;
+  data_entrada?: string;
+  data_saida?: string;
+  quantidade?: number;
+}
+
 export async function entradaAlimentosRoutes(app: FastifyInstance) {
   app.get(
     "/",
@@ -29,16 +36,43 @@ export async function entradaAlimentosRoutes(app: FastifyInstance) {
       preHandler: [checkSessionIdExists],
     },
     async (request, reply) => {
+      const queryParams = request.query as RelatorioQueryParams;
+
       try {
-        const relatorioEntrada = await knex("entrada_alimentos")
+        const queryBuilder = knex("entrada_alimentos")
           .join("alimentos", "alimentos.id", "entrada_alimentos.id_alimento")
-          .join("entrada", "entrada.id", "entrada_alimentos.id_entrada")
+          .join(
+            "unidades_medida",
+            "unidades_medida.id",
+            "entrada_alimentos.unidade_medida_id"
+          )
           .select(
             "alimentos.nome as NomeAlimento",
-            "entrada.data as DataEntrada",
-            "entrada.hora as HoraEntrada",
-            "entrada-alimentos.quantidade as QuantidadeEntrada"
+            "entrada_alimentos.data_entrada as DataEntrada",
+            "entrada_alimentos.quantidade as QuantidadeEntrada",
+            "unidades_medida.sigla as UnidadeMedida"
           );
+
+        if (queryParams.data_vencimento) {
+          queryBuilder.where(
+            "entrada_alimentos.data_vencimento",
+            queryParams.data_vencimento
+          );
+        }
+        if (queryParams.data_entrada) {
+          queryBuilder.where(
+            "entrada_alimentos.data_entrada",
+            queryParams.data_entrada
+          );
+        }
+        if (queryParams.quantidade) {
+          queryBuilder.where(
+            "entrada_alimentos.quantidade",
+            queryParams.quantidade
+          );
+        }
+
+        const relatorioEntrada = await queryBuilder;
         return reply.send(relatorioEntrada);
       } catch (error) {
         console.error(error);
@@ -56,9 +90,11 @@ export async function entradaAlimentosRoutes(app: FastifyInstance) {
     },
     async (request, reply) => {
       const entradaSchema = z.object({
-        id_alimento: z.number(),
-        id_entrada: z.number(),
+        id_alimento: z.string().uuid(),
+        data_vencimento: z.string(),
+        data_entrada: z.string(),
         quantidade: z.number(),
+        unidade_medida_id: z.number(),
       });
 
       const result = entradaSchema.safeParse(request.body);
@@ -92,9 +128,11 @@ export async function entradaAlimentosRoutes(app: FastifyInstance) {
       });
 
       const updateEntradaBodySchema = z.object({
-        id_alimento: z.number().optional(),
-        id_entrada: z.number().optional(),
+        id_alimento: z.string().uuid().optional(),
+        data_vencimento: z.string().optional(),
+        data_entrada: z.string().optional(),
         quantidade: z.number().optional(),
+        unidade_medida_id: z.number().optional(),
       });
 
       try {
