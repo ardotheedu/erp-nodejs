@@ -162,6 +162,12 @@ export async function foodRoutes(app: FastifyInstance) {
       const { data_inicial, data_final } = relatorioSaidaParamsSchema.parse(
         request.query,
       )
+      const relatorio = await relatorioSaida({
+        data_inicial: dayjs(data_inicial).format('YYYY-MM-DD'),
+        data_final: dayjs(data_final).format('YYYY-MM-DD'),
+      })
+
+      return reply.status(201).send(relatorio)
     } catch (error) {
       console.log(error)
       return { error: 'Erro ao gerar relatório de saída' }
