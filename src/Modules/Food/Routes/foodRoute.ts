@@ -7,6 +7,7 @@ import {
   registrarSaida,
   relatorioEntrada,
   relatorioSaida,
+  dicionario,
   remove,
   update,
 } from '../Repositories/foodRepository'
@@ -18,6 +19,16 @@ export async function foodRoutes(app: FastifyInstance) {
   app.get('/', async (request, reply) => {
     try {
       const food = await all()
+      return reply.status(201).send(food)
+    } catch (error) {
+      console.error(error)
+      return { error: 'Erro ao obter alimentos' }
+    }
+  })
+
+  app.get('/dicionario', async (request, reply) => {
+    try {
+      const food = await dicionario()
       return reply.status(201).send(food)
     } catch (error) {
       console.error(error)

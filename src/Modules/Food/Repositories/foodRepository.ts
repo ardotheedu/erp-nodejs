@@ -128,6 +128,11 @@ export async function all(): Promise<Alimento[]> {
   return food
 }
 
+export async function dicionario(): Promise<Alimento[]> {
+  const food = await knex<Alimento>('alimentos').select('id', 'nome')
+  return food
+}
+
 export async function getById(id: string): Promise<Alimento> {
   try {
     console.log(id)
