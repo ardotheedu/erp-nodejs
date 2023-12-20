@@ -1,27 +1,27 @@
-import { Knex } from "knex";
-import { randomUUID } from "node:crypto";
+import { Knex } from 'knex'
+import { randomUUID } from 'node:crypto'
 
 export async function seed(knex: Knex): Promise<void> {
-  await knex("alimentos").del();
+  await knex('alimentos').del()
 
-  await knex("alimentos").insert([
+  await knex('alimentos').insert([
     {
       id: randomUUID(),
-      nome: "Arroz",
+      nome: 'Arroz',
       quantidade_em_estoque: 150,
-      unidade_medida_id: 1,
+      unidade_medida: 'kg',
     },
     {
       id: randomUUID(),
-      nome: "Feijão",
+      nome: 'Feijão',
       quantidade_em_estoque: 0,
-      unidade_medida_id: 1,
+      unidade_medida: 'kg',
     },
     {
       id: randomUUID(),
-      nome: "Macarrão",
+      nome: 'Macarrão',
       quantidade_em_estoque: 0,
-      unidade_medida_id: 7,
+      unidade_medida: 'kg',
     },
-  ]);
+  ])
 }

@@ -56,6 +56,7 @@ export async function foodRoutes(app: FastifyInstance) {
       const foodSchema = z.object({
         nome: z.string(),
         unidade_medida: z.string(),
+        quantidade_em_estoque: z.number(),
       })
 
       const food = foodSchema.parse(request.body)
@@ -128,7 +129,7 @@ export async function foodRoutes(app: FastifyInstance) {
       const saidaSchema = z.object({
         alimento_id: z.string().uuid(),
         quantidade: z.number(),
-        data_saida: z.coerce.date(),
+        data_saida: z.string(),
       })
 
       const saida = saidaSchema.parse(request.body)
