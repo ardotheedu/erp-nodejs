@@ -27,13 +27,13 @@ export async function caixaRoutes(app: FastifyInstance) {
   const querySchema = z.object({
     dataInicio: z
       .string()
-      .refine((data) => dayjs(data, "DD/MM/YYYY", true).isValid(), {
-        message: "dataInicio deve estar no formato DD/MM/YYYY",
+      .refine((data) => dayjs(data, "YYYY/MM/DD", true).isValid(), {
+        message: "dataInicio deve estar no formato YYYY/MM/DD",
       }),
     dataFim: z
       .string()
-      .refine((data) => dayjs(data, "DD/MM/YYYY", true).isValid(), {
-        message: "dataFim deve estar no formato DD/MM/YYYY",
+      .refine((data) => dayjs(data, "YYYY/MM/DD", true).isValid(), {
+        message: "dataFim deve estar no formato YYYY/MM/DD",
       }),
   });
 
@@ -56,8 +56,8 @@ export async function caixaRoutes(app: FastifyInstance) {
 
       // Extrai e formata as datas usando dayjs para o formato local
       const { dataInicio, dataFim } = validationResult.data;
-      const formattedDataInicio = dayjs(dataInicio, "DD/MM/YYYY").format();
-      const formattedDataFim = dayjs(dataFim, "DD/MM/YYYY").format();
+      const formattedDataInicio = dayjs(dataInicio, "YYYY/MM/DD").format();
+      const formattedDataFim = dayjs(dataFim, "YYYY/MM/DD").format();
 
       try {
         // Realiza a consulta ao banco de dados usando os valores formatados

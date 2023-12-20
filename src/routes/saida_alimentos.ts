@@ -4,15 +4,22 @@ import { z } from "zod";
 import { knex } from "../database";
 import { checkSessionIdExists } from "../middlewares/check-session-id-exists";
 
-export async function alimentosSaidaRoutes(app: FastifyInstance) {
+interface RelatorioQueryParams {
+  data_vencimento?: string;
+  data_entrada?: string;
+  data_saida?: string;
+  quantidade?: number;
+}
+
+export async function saidaAlimentosRoutes(app: FastifyInstance) {
   app.get(
-    "/alimentos-saida",
+    "/",
     {
       preHandler: [checkSessionIdExists],
     },
     async (request, reply) => {
       try {
-        const alimentosSaida = await knex("alimentos_saida").select();
+        const alimentosSaida = await knex("saida_alimentos").select();
         return reply.send(alimentosSaida);
       } catch (error) {
         console.error(error);
@@ -29,16 +36,43 @@ export async function alimentosSaidaRoutes(app: FastifyInstance) {
       preHandler: [checkSessionIdExists],
     },
     async (request, reply) => {
+      const queryParams = request.query as RelatorioQueryParams;
+
       try {
-        const relatorioSaida = await knex("alimentos_saida")
-          .join("alimentos", "alimentos.id", "alimentos_saida.id_alimento")
-          .join("saida", "saida.id", "alimentos_saida.id_saida")
+        const queryBuilder = knex("saida_alimentos")
+          .join("alimentos", "alimentos.id", "saida_alimentos.id_alimento")
+          .join(
+            "unidades_medida",
+            "unidades_medida.id",
+            "saida_alimentos.unidade_medida_id"
+          )
           .select(
             "alimentos.nome as NomeAlimento",
-            "saida.data as DataSaida",
-            "saida.hora as HoraSaida",
-            "alimentos_saida.quantidade as QuantidadeSaida"
+            "saida_alimentos.data_saida as DataSaida",
+            "saida_alimentos.quantidade as QuantidadeSaida",
+            "unidades_medida.sigla as UnidadeMedida"
           );
+
+        if (queryParams.data_vencimento) {
+          queryBuilder.where(
+            "saida_alimentos.data_vencimento",
+            queryParams.data_vencimento
+          );
+        }
+        if (queryParams.data_saida) {
+          queryBuilder.where(
+            "saida_alimentos.data_saida",
+            queryParams.data_saida
+          );
+        }
+        if (queryParams.quantidade) {
+          queryBuilder.where(
+            "saida_alimentos.quantidade",
+            queryParams.quantidade
+          );
+        }
+
+        const relatorioSaida = await queryBuilder;
         return reply.send(relatorioSaida);
       } catch (error) {
         console.error(error);
@@ -50,15 +84,16 @@ export async function alimentosSaidaRoutes(app: FastifyInstance) {
   );
 
   app.post(
-    "/alimentos-saida",
+    "/",
     {
       preHandler: [checkSessionIdExists],
     },
     async (request, reply) => {
       const saidaSchema = z.object({
-        id_alimento: z.number(),
-        id_saida: z.number(),
+        id_alimento: z.string().uuid(),
         quantidade: z.number(),
+        data_saida: z.string(),
+        unidade_medida_id: z.number(),
       });
 
       const result = saidaSchema.safeParse(request.body);
@@ -67,7 +102,7 @@ export async function alimentosSaidaRoutes(app: FastifyInstance) {
       }
 
       try {
-        const newId = await knex("alimentos_saida")
+        const newId = await knex("saida_alimentos")
           .insert(result.data)
           .returning("id");
         return reply.status(201).send({ id: newId });
@@ -81,7 +116,7 @@ export async function alimentosSaidaRoutes(app: FastifyInstance) {
   );
 
   app.put(
-    "/alimentos-saida/:id",
+    "/saida_alimentos/:id",
     {
       preHandler: [checkSessionIdExists],
     },
@@ -91,9 +126,10 @@ export async function alimentosSaidaRoutes(app: FastifyInstance) {
       });
 
       const updateSaidaBodySchema = z.object({
-        id_alimento: z.number().optional(),
-        id_saida: z.number().optional(),
+        id_alimento: z.string().uuid().optional(),
         quantidade: z.number().optional(),
+        data_saida: z.string().optional(),
+        unidade_medida_id: z.number().optional(),
       });
 
       try {
@@ -111,14 +147,14 @@ export async function alimentosSaidaRoutes(app: FastifyInstance) {
             .send({ error: "Dados de entrada inválidos." });
         }
 
-        const saidaInfo = await knex("alimentos_saida")
+        const saidaInfo = await knex("saida_alimentos")
           .where({ ID: id })
           .first();
         if (!saidaInfo) {
           return reply.status(404).send("Saída de alimentos não encontrada.");
         }
 
-        await knex("alimentos_saida").where({ ID: id }).update(body.data);
+        await knex("saida_alimentos").where({ ID: id }).update(body.data);
 
         return reply.status(204).send();
       } catch (error) {
@@ -132,7 +168,7 @@ export async function alimentosSaidaRoutes(app: FastifyInstance) {
 
   // DELETE para remover uma saída
   app.delete(
-    "/alimentos-saida/:id",
+    "/saida_alimentos/:id",
     {
       preHandler: [checkSessionIdExists],
     },
@@ -149,14 +185,14 @@ export async function alimentosSaidaRoutes(app: FastifyInstance) {
       const { id } = params.data;
 
       try {
-        const saidaInfo = await knex("alimentos_saida")
+        const saidaInfo = await knex("saida_alimentos")
           .where({ ID: id })
           .first();
         if (!saidaInfo) {
           return reply.status(404).send("Saída de alimentos não encontrada.");
         }
 
-        await knex("alimentos_saida").where({ ID: id }).del();
+        await knex("saida_alimentos").where({ ID: id }).del();
 
         return reply.status(204).send();
       } catch (error) {
