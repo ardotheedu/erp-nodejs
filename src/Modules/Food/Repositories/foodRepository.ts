@@ -31,7 +31,11 @@ export async function relatorioEntrada(params: Relatorio): Promise<any> {
     const dataFinal = dayjs(data_final, 'YYYY/MM/DD').endOf('month').format()
 
     const entradas = await knex('entrada_alimentos')
-      .select('*')
+      .select(
+        'alimentos.quantidade as quantidade_em_estoque',
+        'alimentos.nome as nome',
+        'entrada_alimentos.*',
+      )
       .whereBetween('data_entrada', [dataInicial, dataFinal])
       .join('alimentos', 'entrada_alimentos.alimento_id', '=', 'alimentos.id')
 
@@ -52,8 +56,18 @@ export async function relatorioSaida(params: Relatorio): Promise<any> {
     const dataFinal = dayjs(data_final, 'YYYY/MM/DD').endOf('month').format()
 
     const saidas = await knex('saida_alimentos')
-      .select('*')
+      .select(
+        'alimentos.quantidade as quantidade_em_estoque',
+        'alimentos.nome as nome',
+        'saida_alimentos.*',
+      )
       .whereBetween('data_saida', [dataInicial, dataFinal])
+      .join(
+        'unidade_medida',
+        'saida_alimentos.unidade_medida_id',
+        '=',
+        'unidade_medida.id',
+      )
       .join('alimentos', 'saida_alimentos.alimento_id', '=', 'alimentos.id')
 
     return { saidas }
@@ -76,7 +90,7 @@ export async function darEntrada(params: OperacaoEntradaParams): Promise<void> {
     await knex('alimentos')
       .where({ id: alimento_id })
       .update({
-        quantidade_em_estoque: alimento?.quantidade_em_estoque
+        quantidade: alimento?.quantidade_em_estoque
           ? alimento.quantidade_em_estoque + quantidade
           : quantidade,
       })
@@ -88,6 +102,7 @@ export async function darEntrada(params: OperacaoEntradaParams): Promise<void> {
       data_vencimento: dataVencimento,
       data_entrada: dataEntrada,
       quantidade,
+      unidades_medida_id: alimento?.unidade_medida_id,
     })
   } catch (error) {
     console.error(error)
@@ -101,18 +116,20 @@ export async function registrarSaida(
   try {
     const { alimento_id, quantidade, data_saida } = params
     const alimento = await knex<Alimento>('alimentos')
-      .where({
-        id: alimento_id,
-      })
+      .where({ id: alimento_id })
       .first()
 
-    await knex('alimentos')
-      .where({ id: alimento_id })
-      .update({
-        quantidade_em_estoque: alimento?.quantidade_em_estoque
-          ? alimento.quantidade_em_estoque - quantidade
-          : 0,
+    if (alimento) {
+      const novaQuantidade = alimento.quantidade - quantidade
+      await knex('alimentos').where({ id: alimento_id }).update({
+        quantidade: novaQuantidade,
       })
+    }
+
+    const alimento_depois = await knex<Alimento>('alimentos')
+      .where({ id: alimento_id })
+      .first()
+    console.log(alimento_depois)
     const dataSaida = dayjs(data_saida, 'YYYY/MM/DD').format()
 
     await knex('saida_alimentos').insert({
@@ -120,6 +137,7 @@ export async function registrarSaida(
       alimento_id,
       quantidade,
       data_saida: dataSaida,
+      unidade_medida_id: alimento?.unidade_medida_id,
     })
   } catch (error) {
     console.error(error)
@@ -128,7 +146,14 @@ export async function registrarSaida(
 }
 
 export async function all(): Promise<Alimento[]> {
-  const food = await knex<Alimento>('alimentos').select()
+  const food = await knex<Alimento>('alimentos')
+    .select('alimentos.*', 'unidade_medida.nome as nome_unidade_medida')
+    .join(
+      'unidade_medida',
+      'alimentos.unidade_medida_id',
+      '=',
+      'unidade_medida.id',
+    )
   return food
 }
 
@@ -154,11 +179,23 @@ export async function getById(id: string): Promise<Alimento> {
 }
 
 export async function create(food: Alimento): Promise<void> {
+  const id = randomUUID()
+  const unidade_medida = await knex('unidade_medida')
+    .where('sigla', food.unidade_medida)
+    .first()
   await knex('alimentos').insert({
-    id: randomUUID(),
+    id,
     nome: food.nome,
-    unidade_medida: food.unidade_medida,
-    quantidade_em_estoque: food.quantidade_em_estoque,
+    unidade_medida_id: unidade_medida.id,
+    quantidade: food.quantidade_em_estoque,
+  })
+
+  await knex('entrada_alimentos').insert({
+    alimento_id: id,
+    data_vencimento: dayjs(new Date()).format('YYYY-MM-DD'),
+    data_entrada: dayjs(new Date()).format('YYYY-MM-DD'),
+    quantidade: food.quantidade_em_estoque,
+    unidade_medida_id: unidade_medida.id,
   })
 }
 
