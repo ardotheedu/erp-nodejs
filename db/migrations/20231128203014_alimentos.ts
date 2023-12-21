@@ -9,7 +9,7 @@ export async function up(knex: Knex): Promise<void> {
       .unsigned()
       .references("id")
       .inTable("unidade_medida");
-    table.integer("quantidade_em_estoque").notNullable();
+    table.integer("quantidade").notNullable();
   });
 }
 

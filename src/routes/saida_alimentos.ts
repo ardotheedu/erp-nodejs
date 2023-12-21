@@ -3,10 +3,10 @@ import { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { knex } from "../database";
 import { checkSessionIdExists } from "../middlewares/check-session-id-exists";
+import dayjs from "dayjs";
+import { randomUUID } from "node:crypto";
 
 interface RelatorioQueryParams {
-  data_vencimento?: string;
-  data_entrada?: string;
   data_saida?: string;
   quantidade?: number;
 }
@@ -40,42 +40,42 @@ export async function saidaAlimentosRoutes(app: FastifyInstance) {
 
       try {
         const queryBuilder = knex("saida_alimentos")
-          .join("alimentos", "alimentos.id", "saida_alimentos.id_alimento")
-          .join(
-            "unidades_medida",
-            "unidades_medida.id",
+          .leftJoin("alimentos", "alimentos.id", "saida_alimentos.alimento_id")
+          .leftJoin(
+            "unidade_medida",
+            "unidade_medida.id",
             "saida_alimentos.unidade_medida_id"
           )
           .select(
             "alimentos.nome as NomeAlimento",
             "saida_alimentos.data_saida as DataSaida",
             "saida_alimentos.quantidade as QuantidadeSaida",
-            "unidades_medida.sigla as UnidadeMedida"
+            "unidade_medida.sigla as UnidadeMedida"
           );
 
-        if (queryParams.data_vencimento) {
-          queryBuilder.where(
-            "saida_alimentos.data_vencimento",
-            queryParams.data_vencimento
-          );
-        }
         if (queryParams.data_saida) {
           queryBuilder.where(
             "saida_alimentos.data_saida",
+            "=",
             queryParams.data_saida
           );
         }
+
         if (queryParams.quantidade) {
           queryBuilder.where(
             "saida_alimentos.quantidade",
+            "=",
             queryParams.quantidade
           );
         }
 
         const relatorioSaida = await queryBuilder;
+
+        console.log("Query Results:", relatorioSaida);
+
         return reply.send(relatorioSaida);
       } catch (error) {
-        console.error(error);
+        console.error("Error executing query:", error);
         return reply
           .status(500)
           .send({ error: "Erro ao gerar relatório de saída." });
@@ -83,38 +83,61 @@ export async function saidaAlimentosRoutes(app: FastifyInstance) {
     }
   );
 
-  app.post(
-    "/",
-    {
-      preHandler: [checkSessionIdExists],
-    },
-    async (request, reply) => {
-      const saidaSchema = z.object({
-        id_alimento: z.string().uuid(),
-        quantidade: z.number(),
-        data_saida: z.string(),
-        unidade_medida_id: z.number(),
+  app.post("/", async (request, reply) => {
+    const createSaidaSchema = z.object({
+      alimento_id: z.string().uuid(),
+      data_saida: z.coerce.date(),
+      quantidade: z.number().refine((value) => !isNaN(value) && value > 0),
+      unidade_medida_id: z
+        .number()
+        .refine((value) => !isNaN(value) && value > 0),
+    });
+
+    try {
+      const { alimento_id, data_saida, quantidade, unidade_medida_id } =
+        createSaidaSchema.parse(request.body);
+
+      // Convertendo milissegundos para objetos de data usando Day.js
+      const dataSaidaObj = dayjs(data_saida);
+
+      console.log("Parsed Values:", {
+        alimento_id,
+        data_saida: dataSaidaObj.toISOString(), // Convertendo para ISO
+        quantidade,
+        unidade_medida_id,
       });
 
-      const result = saidaSchema.safeParse(request.body);
-      if (!result.success) {
-        return reply.status(400).send({ error: "Dados de entrada inválidos" });
+      let sessionId = request.cookies.sessionId;
+
+      if (!sessionId) {
+        sessionId = randomUUID();
+
+        reply.setCookie("sessionId", sessionId, {
+          path: "/",
+          maxAge: 1000 * 60 * 60 * 24 * 7,
+        });
       }
 
-      try {
-        const newId = await knex("saida_alimentos")
-          .insert(result.data)
-          .returning("id");
-        return reply.status(201).send({ id: newId });
-      } catch (error) {
-        console.error(error);
-        return reply
-          .status(500)
-          .send({ error: "Erro ao adicionar saída de alimentos." });
-      }
+      // Inserir na tabela saida_alimentos
+      await knex("saida_alimentos").insert({
+        alimento_id,
+        data_saida: dataSaidaObj.toISOString(), // Convertendo para ISO
+        quantidade,
+        unidade_medida_id,
+      });
+
+      console.log("Exit Added Successfully.");
+
+      return reply.status(201).send({});
+    } catch (error) {
+      console.error("Error Adding Exit:", error);
+      return reply
+        .status(500)
+        .send({ error: "Erro ao adicionar saída de alimentos." });
     }
-  );
+  });
 
+  // PUT para atualizar uma saída existente
   app.put(
     "/saida_alimentos/:id",
     {
@@ -126,10 +149,10 @@ export async function saidaAlimentosRoutes(app: FastifyInstance) {
       });
 
       const updateSaidaBodySchema = z.object({
-        id_alimento: z.string().uuid().optional(),
-        quantidade: z.number().optional(),
-        data_saida: z.string().optional(),
-        unidade_medida_id: z.number().optional(),
+        id_alimento: z.string().uuid(),
+        data_saida: z.string(),
+        quantidade: z.number(),
+        unidade_medida_id: z.number(),
       });
 
       try {
@@ -142,9 +165,7 @@ export async function saidaAlimentosRoutes(app: FastifyInstance) {
 
         const body = updateSaidaBodySchema.safeParse(request.body);
         if (!body.success) {
-          return reply
-            .status(400)
-            .send({ error: "Dados de entrada inválidos." });
+          return reply.status(400).send({ error: "Dados de saída inválidos." });
         }
 
         const saidaInfo = await knex("saida_alimentos")
@@ -166,7 +187,6 @@ export async function saidaAlimentosRoutes(app: FastifyInstance) {
     }
   );
 
-  // DELETE para remover uma saída
   app.delete(
     "/saida_alimentos/:id",
     {
