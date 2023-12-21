@@ -33,6 +33,7 @@ export async function relatorioEntrada(params: Relatorio): Promise<any> {
     const entradas = await knex('entrada_alimentos')
       .select('*')
       .whereBetween('data_entrada', [dataInicial, dataFinal])
+      .join('alimentos', 'entrada_alimentos.alimento_id', '=', 'alimentos.id')
 
     return { entradas }
   } catch (error) {
@@ -45,12 +46,15 @@ export async function relatorioSaida(params: Relatorio): Promise<any> {
   try {
     const { data_inicial, data_final } = params
 
-    const dataInicial = dayjs(data_inicial, 'YYYY/MM/DD').startOf('month').format()
+    const dataInicial = dayjs(data_inicial, 'YYYY/MM/DD')
+      .startOf('month')
+      .format()
     const dataFinal = dayjs(data_final, 'YYYY/MM/DD').endOf('month').format()
 
     const saidas = await knex('saida_alimentos')
       .select('*')
       .whereBetween('data_saida', [dataInicial, dataFinal])
+      .join('alimentos', 'saida_alimentos.alimento_id', '=', 'alimentos.id')
 
     return { saidas }
   } catch (error) {
@@ -109,14 +113,13 @@ export async function registrarSaida(
           ? alimento.quantidade_em_estoque - quantidade
           : 0,
       })
-      console.log(data_saida);
-    const dataSaida = dayjs(data_saida, 'YYYY-MM-DD').format()
-    console.log(dataSaida);
+    const dataSaida = dayjs(data_saida, 'YYYY/MM/DD').format()
 
     await knex('saida_alimentos').insert({
+      id: randomUUID(),
       alimento_id,
       quantidade,
-      data_saida,
+      data_saida: dataSaida,
     })
   } catch (error) {
     console.error(error)
@@ -126,6 +129,11 @@ export async function registrarSaida(
 
 export async function all(): Promise<Alimento[]> {
   const food = await knex<Alimento>('alimentos').select()
+  return food
+}
+
+export async function dicionario(): Promise<Alimento[]> {
+  const food = await knex<Alimento>('alimentos').select('id', 'nome')
   return food
 }
 
